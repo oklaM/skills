@@ -7,8 +7,7 @@ description: Backtest stock trading strategies on historical OHLCV data and repo
 
 ## Version Notice
 
-- This is the clean slug for production use.
-- Use `$stock-strategy-backtester-clean` when the legacy slug is flagged by security scanners.
+- Use this clean slug if your environment pins to `stock-strategy-backtester-clean`.
 
 ## Overview
 
@@ -38,9 +37,7 @@ python scripts/backtest_strategy.py \
   --rsi-entry 30 \
   --rsi-exit 55 \
   --commission-bps 5 \
-  --slippage-bps 2 \
-  --output-json /path/to/result.json \
-  --output-trades /path/to/trades.csv
+  --slippage-bps 2
 ```
 
 ## Workflow
@@ -104,9 +101,6 @@ python scripts/backtest_strategy.py \
 - `metrics`
 - `config`
 - `trades`
-- Optional files:
-- `--output-json`: full result JSON
-- `--output-trades`: trade-by-trade CSV
 
 ## Analysis Guardrails
 
