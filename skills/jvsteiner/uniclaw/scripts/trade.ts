@@ -26,17 +26,28 @@ async function main() {
   switch (command) {
     case 'buy': {
       const { marketId, side, price, quantity } = parseTradeArgs();
+      const priceNum = parseFloat(price);
+      const qtyNum = parseInt(quantity, 10);
+      const collateral = side === 'yes' ? priceNum : 1 - priceNum;
+      const totalCost = collateral * qtyNum;
+      const payout = qtyNum;
+
+      console.log(`Betting ${side.toUpperCase()} at ${Math.round(priceNum * 100)}%`);
+      console.log(`Cost: ${totalCost.toFixed(2)} UCT (${qtyNum} shares x ${collateral.toFixed(2)} each)`);
+      console.log(`Payout if correct: ${payout.toFixed(2)} UCT (profit: ${(payout - totalCost).toFixed(2)} UCT)`);
+      console.log();
+
       const result = await apiPost(`/api/agent/markets/${marketId}/orders`, {
         side,
-        price: parseFloat(price),
-        quantity: parseInt(quantity, 10),
+        price: priceNum,
+        quantity: qtyNum,
       }, privateKey);
 
       console.log('Order placed! ID:', result.orderId);
       if (result.fills.length > 0) {
         console.log('Fills:');
         for (const fill of result.fills) {
-          console.log(`  ${fill.quantity} @ ${fill.price}`);
+          console.log(`  ${fill.quantity} shares @ ${Math.round(fill.price * 100)}%`);
         }
       } else {
         console.log('Resting on book (no immediate fills).');
@@ -63,7 +74,8 @@ async function main() {
         return;
       }
       for (const o of orders) {
-        console.log(`[${o.id}] ${o.market_id} ${o.side} ${o.quantity}@${o.price} (filled: ${o.filled_quantity})`);
+        const pct = Math.round(parseFloat(o.price) * 100);
+        console.log(`[${o.id}] ${o.market_id} ${o.side.toUpperCase()} ${o.quantity} shares @ ${pct}% (filled: ${o.filled_quantity})`);
       }
       break;
     }

@@ -20,11 +20,21 @@ async function main() {
 
       for (const m of markets) {
         const pub = pubMap.get(m.id) as any;
-        const priceInfo = pub
-          ? ` | YES bid: ${pub.yes_bid ?? '—'}  NO ask: ${pub.no_ask ?? '—'}  Last: ${pub.last_price ?? '—'}  Vol: ${pub.volume}`
-          : '';
+        let chanceLine = '';
+        if (pub) {
+          const bid = pub.best_bid;
+          const ask = pub.best_ask;
+          const mid = bid != null && ask != null ? (bid + ask) / 2
+            : bid != null ? bid
+            : ask != null ? ask
+            : pub.last_price;
+          const pct = mid != null ? `${Math.round(mid * 100)}% chance` : 'No orders';
+          chanceLine = `  ${pct}  |  Vol: ${pub.volume} UCT  |  Closes: ${m.closes_at}`;
+        } else {
+          chanceLine = `  Closes: ${m.closes_at}`;
+        }
         console.log(`[${m.id}] ${m.question}`);
-        console.log(`  Closes: ${m.closes_at}${priceInfo}`);
+        console.log(chanceLine);
         console.log();
       }
       break;
@@ -38,30 +48,31 @@ async function main() {
       const data = await apiPublicGet(`/api/public/markets/${arg}`);
       const { market, order_book, recent_trades, stats } = data;
 
-      console.log('Market:', market.id);
-      console.log('Question:', market.question);
-      console.log('Closes:', market.closes_at);
-      console.log('Status:', market.status);
-      console.log(`Volume: ${stats.volume} UCT (${stats.trade_count} trades)`);
+      // Compute mid price
+      const bids = order_book.filter((o: any) => o.side === 'yes');
+      const asks = order_book.filter((o: any) => o.side === 'no');
+      const bestBid = bids.length > 0 ? Math.max(...bids.map((o: any) => parseFloat(o.price))) : null;
+      const bestAsk = asks.length > 0 ? Math.min(...asks.map((o: any) => parseFloat(o.price))) : null;
+      const mid = bestBid != null && bestAsk != null ? (bestBid + bestAsk) / 2
+        : bestBid != null ? bestBid
+        : bestAsk != null ? bestAsk
+        : null;
+      const pct = mid != null ? `${Math.round(mid * 100)}%` : '—';
+
+      console.log(`${market.question}`);
+      console.log(`${pct} chance  |  Vol: ${stats.volume} UCT (${stats.trade_count} trades)  |  Closes: ${market.closes_at}`);
       console.log();
 
-      // Order book
-      const yesBids = order_book.filter((o: any) => o.side === 'yes').reverse();
-      const noOffers = order_book.filter((o: any) => o.side === 'no');
+      // Order book — all prices on the same probability axis
+      const allOrders = order_book
+        .map((o: any) => ({ price: parseFloat(o.price), depth: parseInt(o.depth, 10), side: o.side }))
+        .sort((a: any, b: any) => b.price - a.price);
 
-      if (yesBids.length > 0 || noOffers.length > 0) {
+      if (allOrders.length > 0) {
         console.log('Order Book:');
-        if (yesBids.length > 0) {
-          console.log('  YES bids:');
-          for (const o of yesBids) {
-            console.log(`    ${o.price} x${o.depth}`);
-          }
-        }
-        if (noOffers.length > 0) {
-          console.log('  NO bids:');
-          for (const o of noOffers) {
-            console.log(`    ${o.price} x${o.depth}`);
-          }
+        for (const o of allOrders) {
+          const label = o.side === 'yes' ? 'bid' : 'ask';
+          console.log(`  ${Math.round(o.price * 100)}%  ${o.depth} shares  (${label})`);
         }
       } else {
         console.log('Order Book: empty');
@@ -72,7 +83,7 @@ async function main() {
         console.log();
         console.log('Recent Trades:');
         for (const t of recent_trades.slice(0, 5)) {
-          console.log(`  ${t.quantity}@${t.price} — ${new Date(t.created_at).toLocaleString()}`);
+          console.log(`  ${t.quantity} shares @ ${Math.round(parseFloat(t.price) * 100)}%  —  ${new Date(t.created_at).toLocaleString()}`);
         }
       }
       break;
