@@ -1,178 +1,128 @@
-# CANN Review Skill 🔍
+# CANN Runtime 代码审查技能
 
-[![ClawHub](https://img.shields.io/badge/ClawHub-Publish-green)](https://clawhub.gitcode.com)
-[![Version](https://img.shields.io/badge/version-1.0.0-blue)](./skill.yaml)
-[![License](https://img.shields.io/badge/license-MIT-orange)](./LICENSE)
+自动审查 GitCode 上的 CANN runtime 项目 PR，检查内存泄漏、安全漏洞和代码可读性。
 
-CANN runtime 项目自动化代码审查技能，帮助开发者快速完成 PR 审查工作。
+## ✨ 特性
 
-## ✨ 功能特性
-
-- 🔍 **全面审查**: 自动分析代码变更，检查内存泄漏、安全漏洞和可读性问题
-- 📊 **结构化报告**: 生成清晰、专业的审查报告
-- 🚀 **自动化发布**: 自动发布审查评论和 `/lgtm` 标记
-- ⚙️ **可配置**: 支持自定义审查重点和严重程度阈值
+- 🔍 **全面代码审查**：内存泄漏、安全漏洞、代码可读性
+- 🚀 **基于 API**：使用 GitCode API，无需浏览器自动化，稳定可靠
+- 💬 **自动评论**：自动发布结构化审查报告
+- ✅ **LGTM 支持**：低风险 PR 自动发布 `/lgtm`
+- 🤖 **自动模式**：支持定时任务，自动审查新 PR
 
 ## 📦 安装
 
-### 从 ClawHub 安装
+1. 确保 OpenClaw 已配置 GitCode API Token（已在 TOOLS.md 中配置）
+2. 技能位于：`~/.openclaw/workspace/skills/cann-review/`
 
-```bash
-claw install cann-review
+## 🚀 使用方法
+
+### 手动审查单个 PR
+
+直接提供 PR 链接：
+
+```
+审查这个 PR: https://gitcode.com/cann/runtime/merge_requests/628
 ```
 
-### 手动安装
+或使用命令：
 
-```bash
-git clone https://gitcode.com/clawhub/cann-review.git
-cd cann-review
-claw install .
+```
+cann review PR#628
 ```
 
-## 🚀 快速开始
+### 自动审查模式
 
-### 基本用法
+配置定时任务，自动审查新 PR：
 
-```bash
-claw run cann-review --pr-url "https://gitcode.com/cann/runtime/pull/472"
+```yaml
+# 在 OpenClaw 中配置 cron 任务
+schedule: "0 */2 * * *"  # 每 2 小时执行一次
+task: "cann-review auto"
 ```
 
-### 指定审查重点
+## 🔧 API 辅助脚本
+
+提供了 `gitcode-api.sh` 辅助脚本：
 
 ```bash
-# 只检查内存泄漏
-claw run cann-review --pr-url "..." --focus memory
+# 获取 PR 信息
+./gitcode-api.sh get-pr cann runtime 628
 
-# 只检查安全问题
-claw run cann-review --pr-url "..." --focus security
+# 获取 PR 文件变更
+./gitcode-api.sh get-files cann runtime 628
 
-# 全面检查 (默认)
-claw run cann-review --pr-url "..." --focus all
+# 发布评论
+./gitcode-api.sh post-comment cann runtime 628 "LGTM!"
+
+# 列出开放的 PR
+./gitcode-api.sh list-prs cann runtime
 ```
 
-### 配置 LGTM 阈值
+## 📊 审查报告格式
 
-```bash
-# 低风险才发 /lgtm
-claw run cann-review --pr-url "..." --threshold low
+审查报告包括：
 
-# 中低风险都发 /lgtm (默认)
-claw run cann-review --pr-url "..." --threshold medium
+- **审查结论**：严重性评估和建议
+- **修改概述**：变更文件和核心变更
+- **代码质量检查**：
+  - 内存安全
+  - 安全性
+  - 可读性
+  - 逻辑正确性
+- **改进建议**：具体优化建议
+- **代码亮点**：做得好的地方
 
-# 只发审查报告，不发 /lgtm
-claw run cann-review --pr-url "..." --threshold high
-```
+## ⚙️ 配置
 
-## 📋 审查报告格式
+### API Token
+
+在 `TOOLS.md` 中配置：
 
 ```markdown
-## Code Review Report
-
-### 1. 整体情况
-- **严重程度**: low
-- **是否可以合入**: ✅ 可以合入
-
-### 2. 问题点
-
-#### 2.1 代码可读性 - 建议改进
-- `rts_device.h:551` 文档中参数名不一致
-
-### 3. 修改建议
-...
-
-### 4. 优点
-- 代码结构清晰
-- 错误处理完善
-
-### 5. 内存泄漏检查
-- 未发现明显的内存泄漏问题
-
-### 6. 安全检查
-- 参数空指针检查已到位
-
-总体评价：代码质量良好，可以合入。
+### GitCode
+- **Personal Access Token**: `your-token-here`
+- **API Base URL**: `https://api.gitcode.com/api/v5`
 ```
 
-## ⚙️ 配置选项
+### 审查阈值
 
-| 参数 | 类型 | 默认值 | 描述 |
-|------|------|--------|------|
-| `pr_url` | string | 必填 | PR 页面链接 |
-| `focus_areas` | string | `all` | 审查重点: `memory`, `security`, `readability`, `all` |
-| `severity_threshold` | string | `medium` | 发布 /lgtm 的阈值: `low`, `medium`, `high` |
+可在技能中调整发布 LGTM 的阈值：
 
-## 🔍 审查重点说明
+- `low`: 仅低风险发布 LGTM
+- `medium`: 低和中低风险发布 LGTM（默认）
+- `high`: 低、中、高风险都发布 LGTM（不推荐）
 
-### 内存泄漏检查 (memory)
-- 动态内存分配/释放配对
-- RAII 模式使用
-- 异常路径资源释放
-- 容器内存管理
+## 🐛 故障排查
 
-### 安全漏洞检查 (security)
-- 缓冲区溢出
-- 空指针解引用
-- 类型转换安全
-- 整数溢出
+### API 返回 401
 
-### 代码可读性 (readability)
-- 命名规范
-- 注释完整性
-- 代码结构
-- 项目风格遵循
-
-## 📊 严重程度等级
-
-| 等级 | 描述 | 是否可合入 | 自动 /lgtm |
-|------|------|------------|------------|
-| Low | 建议性改进 | ✅ | ✅ |
-| Medium | 一般问题 | ⚠️ | ✅ |
-| High | 严重问题 | ❌ | ❌ |
-| Critical | 安全/内存严重问题 | ❌ | ❌ |
-
-## 🛠️ 开发
-
-### 项目结构
-
-```
-cann-review/
-├── skill.yaml      # 技能元数据定义
-├── prompt.md       # 提示词模板
-├── README.md       # 使用文档
-├── LICENSE         # 许可证
-└── examples/       # 示例
-    └── example_report.md
-```
-
-### 本地测试
-
+检查 Token 是否有效：
 ```bash
-# 使用 OpenClaw 测试
-claw test . --pr-url "https://gitcode.com/cann/runtime/pull/472"
+curl -H "Authorization: Bearer YOUR_TOKEN" https://api.gitcode.com/api/v5/user
 ```
 
-## 🤝 贡献
+### 无法评论已合并的 PR
 
-欢迎提交 Issue 和 Pull Request！
+这是正常行为，已合并的 PR 可能禁止新评论。
 
-1. Fork 本仓库
-2. 创建特性分支 (`git checkout -b feature/amazing-feature`)
-3. 提交更改 (`git commit -m 'Add amazing feature'`)
-4. 推送到分支 (`git push origin feature/amazing-feature`)
-5. 创建 Pull Request
+### API 频率限制
+
+GitCode API 限制：50次/分钟，4000次/小时。如需大量审查，添加适当延迟。
+
+## 📝 版本历史
+
+### v3.0.0 (2026-03-04)
+- 🎉 **重大更新**：全面改用 GitCode API
+- 🚀 提高稳定性和可靠性
+- 📝 简化操作流程
+
+详细版本历史见 SKILL.md
 
 ## 📄 许可证
 
-本项目采用 MIT 许可证 - 详见 [LICENSE](./LICENSE) 文件
+内部使用
 
-## 🙏 致谢
+## 🤝 贡献
 
-- OpenClaw 团队
-- CANN runtime 项目组
-- 所有贡献者
-
----
-
-<p align="center">
-  Made with ❤️ by OpenClaw Team
-</p>
+如有问题或建议，请联系维护团队。
