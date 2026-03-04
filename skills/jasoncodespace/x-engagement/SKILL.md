@@ -1,7 +1,7 @@
 ---
 name: x-engagement
-version: 4.0.0
-description: "X/Twitter 运营自动化。完整 onboarding → Persona 学习 → 人类行为模拟 → 记忆系统 → 定时任务 → For You 关注 → Following 互动"
+version: 4.1.2
+description: "X/Twitter 运营自动化。完整 onboarding → Persona 学习 → 人类行为模拟 → 记忆系统 → 定时任务 → For You 关注 → Following 互动 → 自我进化系统"
 ---
 
 # X 运营自动化 Skill v4.0
