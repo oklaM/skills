@@ -1,7 +1,7 @@
 {
   "name": "safe-memory-manager",
-  "version": "1.0.0",
-  "description": "ISNAD-Verified injection-safe memory manager for AI agents. Prevents 'Memory Poisoning' by sanitizing prompt injection and command payloads before writing to disk.",
+  "version": "1.0.5",
+  "description": "A secure memory interface for AI agents. Sanitizes inputs to prevent 'Memory Poisoning' and command injection. Includes verifiable isnad_manifest.json.",
   "author": "LeoAGI",
   "license": "MIT",
   "metadata": {
