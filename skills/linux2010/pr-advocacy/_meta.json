@@ -3,11 +3,16 @@
   "slug": "pr-advocacy",
   "displayName": "PR Advocacy",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1772554093108,
-    "commit": "https://github.com/openclaw/skills/commit/56a6980176c43000ba77675a4f9c4d54e0e5486b"
+    "version": "1.0.3",
+    "publishedAt": 1772555702529,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1772554093108,
+      "commit": "https://github.com/openclaw/skills/commit/56a6980176c43000ba77675a4f9c4d54e0e5486b"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1772471051058,

@@ -58,6 +58,33 @@ When a PR is successfully MERGED:
 - **Celebrate the contribution!**
 - **Update skills and workflows** based on successful patterns
 
+## Real-time Tracking List Synchronization
+
+### Automatic Updates
+- **After any PR status change**, immediately update the tracking list file
+- **When PRs are added/removed**, synchronize the tracking list in real-time
+- **Prevent information loss** by ensuring all changes are persisted to disk
+- **Maintain accurate state** by writing updates immediately after processing
+
+### Tracking List File Management
+- **Location**: `/Users/hope/.openclaw/agents/coding/workspace/memory/pr-tracking-list.md`
+- **Format**: Markdown with clear sections for active, closed, and merged PRs
+- **Updates**: Atomic writes to prevent corruption during concurrent access
+- **Backup**: Maintain version history through git commits for rollback capability
+
+### Synchronization Workflow
+1. **Detect PR status change** (OPEN/CLOSED/MERGED)
+2. **Process the change** according to status rules
+3. **Update tracking list file** immediately with new state
+4. **Verify file integrity** to ensure no data loss
+5. **Log the update** for audit trail and debugging
+
+### Error Handling
+- **File write failures**: Retry with exponential backoff
+- **Concurrent access**: Use atomic file operations to prevent race conditions
+- **Data corruption**: Validate file format before and after updates
+- **Recovery**: Maintain backup copies for emergency restoration
+
 ## Implementation Guidelines
 
 ### Check Status Analysis
@@ -112,6 +139,7 @@ Let me know if you need any additional changes!
 ### Memory Tracking
 - Maintain PR tracking list in workspace memory
 - **Automatically clean up closed/rejected PRs** from tracking list
+- **Real-time synchronization** of tracking list file after any PR status change
 - Record resolution outcomes for learning
 - Update core memory with successful advocacy patterns
 
@@ -121,6 +149,7 @@ Let me know if you need any additional changes!
 3. **Commit changes** to existing PR branch
 4. **Update tracking status** and notify maintainers
 5. **Handle closure** by removing from active monitoring
+6. **Synchronize tracking list file** immediately after any change
 
 ## Success Metrics
 
@@ -128,6 +157,7 @@ Let me know if you need any additional changes!
 - **Resolution rate**: > 90% of PRs merged within 7 days  
 - **Rework rate**: < 10% of PRs require major revisions after initial review
 - **Maintainer satisfaction**: Positive feedback from maintainers on communication quality
+- **Data integrity**: 100% tracking list accuracy with zero information loss
 
 ## Best Practices
 
