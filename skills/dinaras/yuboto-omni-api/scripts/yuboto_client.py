@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Minimal Yuboto Omni API client (v2 endpoints).
+"""Minimal Yuboto Omni API client (v2 endpoints) with zero third-party deps.
 
 Focuses on production-critical flows:
 - Send message
@@ -17,7 +17,9 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Any, Dict, List, Optional
 import json
-import requests
+import urllib.error
+import urllib.parse
+import urllib.request
 
 
 class YubotoApiError(Exception):
@@ -37,19 +39,17 @@ class YubotoConfig:
 class YubotoClient:
     def __init__(self, config: YubotoConfig):
         self.config = config
-        self.session = requests.Session()
-        self.session.headers.update({
+        self.headers = {
             "Accept": "application/json",
             "Content-Type": "application/json",
             "Authorization": self._build_auth_header(config.api_key),
-        })
+        }
 
     @staticmethod
     def _build_auth_header(api_key: str) -> str:
         k = (api_key or "").strip()
         if not k:
             raise ValueError("api_key is required")
-        # Accept either raw key or already-prefixed header value.
         if k.lower().startswith("basic "):
             return k
         return f"Basic {k}"
@@ -57,38 +57,55 @@ class YubotoClient:
     def _url(self, path: str) -> str:
         return self.config.base_url.rstrip("/") + path
 
-    def _request(self, method: str, path: str, *, params: Optional[Dict[str, Any]] = None, json_body: Optional[Dict[str, Any]] = None) -> Any:
+    def _request(
+        self,
+        method: str,
+        path: str,
+        *,
+        params: Optional[Dict[str, Any]] = None,
+        json_body: Optional[Dict[str, Any]] = None,
+    ) -> Any:
+        url = self._url(path)
+        if params:
+            qs = urllib.parse.urlencode({k: v for k, v in params.items() if v is not None})
+            if qs:
+                url = f"{url}?{qs}"
+
+        data = None
+        if json_body is not None:
+            data = json.dumps(json_body, ensure_ascii=False).encode("utf-8")
+
+        req = urllib.request.Request(url=url, data=data, headers=self.headers, method=method.upper())
+
         try:
-            r = self.session.request(
-                method=method,
-                url=self._url(path),
-                params=params,
-                json=json_body,
-                timeout=self.config.timeout,
-            )
-        except requests.RequestException as e:
-            raise YubotoApiError(-1, f"Network error: {e}") from e
+            with urllib.request.urlopen(req, timeout=self.config.timeout) as resp:
+                raw = resp.read()
+                text = raw.decode("utf-8", errors="replace") if raw else ""
+                if not text:
+                    return None
+                try:
+                    return json.loads(text)
+                except Exception:
+                    return text
+        except urllib.error.HTTPError as e:
+            raw = e.read() if hasattr(e, "read") else b""
+            text = raw.decode("utf-8", errors="replace") if raw else ""
+            payload: Any = None
+            if text:
+                try:
+                    payload = json.loads(text)
+                except Exception:
+                    payload = text
 
-        # Parse response payload when possible.
-        payload: Any = None
-        if r.text:
-            try:
-                payload = r.json()
-            except Exception:
-                payload = r.text
-
-        if r.status_code >= 400:
-            msg = f"HTTP {r.status_code} for {method} {path}"
+            msg = f"HTTP {e.code} for {method.upper()} {path}"
             if isinstance(payload, dict):
-                # Common ASP.NET ProblemDetails keys
                 detail = payload.get("detail") or payload.get("title") or payload.get("message")
                 if detail:
                     msg += f": {detail}"
-            raise YubotoApiError(r.status_code, msg, payload=payload)
+            raise YubotoApiError(e.code, msg, payload=payload) from e
+        except urllib.error.URLError as e:
+            raise YubotoApiError(-1, f"Network error: {e}") from e
 
-        return payload
-
-    # -------- core account --------
     def user_balance(self) -> Dict[str, Any]:
         return self._request("GET", "/v2/Account/UserBalance")
 
@@ -101,13 +118,14 @@ class YubotoClient:
             body["phonenumber"] = phonenumber
         return self._request("POST", "/v2/Account/Cost", json_body=body)
 
-    # -------- messaging --------
     def send_message(
         self,
         *,
         contacts: List[str],
         sms_text: Optional[str] = None,
         sms_sender: Optional[str] = None,
+        sms_type: Optional[str] = None,
+        sms_longsms: Optional[bool] = None,
         viber_text: Optional[str] = None,
         viber_sender: Optional[str] = None,
         dlr: bool = True,
@@ -123,14 +141,10 @@ class YubotoClient:
         contact_objs = []
         for c in contacts:
             cc = (c or "").strip()
-            if not cc:
-                continue
-            contact_objs.append({"phonenumber": cc})
+            if cc:
+                contact_objs.append({"phonenumber": cc})
 
-        body: Dict[str, Any] = {
-            "contacts": contact_objs,
-            "dlr": dlr,
-        }
+        body: Dict[str, Any] = {"contacts": contact_objs, "dlr": dlr}
 
         if callback_url:
             body["callbackUrl"] = callback_url
@@ -143,7 +157,12 @@ class YubotoClient:
 
         if sms_text:
             sender = sms_sender or "Yuboto"
-            body["sms"] = {"sender": sender, "text": sms_text}
+            sms_obj: Dict[str, Any] = {"sender": sender, "text": sms_text}
+            if sms_type:
+                sms_obj["typesms"] = sms_type
+            if sms_longsms is not None:
+                sms_obj["longsms"] = bool(sms_longsms)
+            body["sms"] = sms_obj
         if viber_text:
             sender = viber_sender or sms_sender or "Yuboto"
             body["viber"] = {"sender": sender, "viberMessageType": "Text", "text": viber_text}
@@ -157,9 +176,8 @@ class YubotoClient:
         try:
             return self._request("POST", "/v2/Messages/Send", json_body=body)
         except YubotoApiError as e:
-            # Some backends may be configured to expect a wrapper object name.
             if e.status_code == 400 and isinstance(e.payload, dict):
-                errs = (e.payload.get("errors") or {})
+                errs = e.payload.get("errors") or {}
                 if "sendMessageRequest" in errs:
                     wrapped = {"sendMessageRequest": body}
                     return self._request("POST", "/v2/Messages/Send", json_body=wrapped)
@@ -176,5 +194,4 @@ class YubotoClient:
 
 
 if __name__ == "__main__":
-    # quick local sanity only
     print("YubotoClient module loaded")

@@ -2,15 +2,18 @@
 set -euo pipefail
 
 BASE_DIR="$(cd "$(dirname "$0")/.." && pwd)"
-LOG_DIR="$BASE_DIR/logs"
-STATE_DIR="$BASE_DIR/state"
+
+# Keep runtime data OUTSIDE the skill directory by default.
+STATE_BASE="${YUBOTO_STATE_DIR:-${XDG_STATE_HOME:-$HOME/.local/state}/openclaw/yuboto-omni-api}"
+LOG_DIR="${YUBOTO_LOG_DIR:-$STATE_BASE/logs}"
+STATE_DIR="$STATE_BASE/state"
 mkdir -p "$LOG_DIR" "$STATE_DIR"
 
-# Load .env if present in skill root
-if [ -f "$BASE_DIR/.env" ]; then
-  set -a
-  . "$BASE_DIR/.env"
-  set +a
+# Check for OCTAPUSH_API_KEY environment variable
+if [ -z "${OCTAPUSH_API_KEY:-}" ]; then
+  echo "ERROR: OCTAPUSH_API_KEY environment variable is not set." >&2
+  echo "Set it via OpenClaw config (preferred) or export OCTAPUSH_API_KEY='your_key'" >&2
+  exit 1
 fi
 
 TS="$(date -u +%Y-%m-%dT%H:%M:%SZ)"

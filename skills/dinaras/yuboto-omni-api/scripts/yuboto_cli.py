@@ -6,6 +6,7 @@ import csv
 import json
 import os
 import sys
+import time
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Dict, List, Optional
@@ -21,6 +22,26 @@ FINAL_STATUSES = {
     "invalid",
     "blacklisted",
 }
+
+API_MAX_RECIPIENTS_PER_REQUEST = 1000
+SAFE_DEFAULT_BATCH_SIZE = 200
+
+# Local state retention (override via env if needed)
+MAX_SENT_LOG_LINES = int(os.getenv("YUBOTO_MAX_SENT_LOG_LINES", "5000"))
+MAX_STATE_RECORDS = int(os.getenv("YUBOTO_MAX_STATE_RECORDS", "5000"))
+
+# Privacy: do not persist sensitive payload/text by default.
+YUBOTO_STORE_FULL_PAYLOAD = os.getenv("YUBOTO_STORE_FULL_PAYLOAD", "false").lower() in {"1", "true", "yes", "on"}
+
+
+def _default_state_dir() -> Path:
+    explicit = os.getenv("YUBOTO_STATE_DIR")
+    if explicit:
+        return Path(explicit).expanduser()
+    xdg_state = os.getenv("XDG_STATE_HOME")
+    if xdg_state:
+        return Path(xdg_state).expanduser() / "openclaw" / "yuboto-omni-api"
+    return Path.home() / ".local" / "state" / "openclaw" / "yuboto-omni-api"
 
 
 def utc_now() -> str:
@@ -62,6 +83,55 @@ def _append_sent(state_dir: Path, row: Dict[str, Any]):
         f.write(json.dumps(row, ensure_ascii=False) + "\n")
 
 
+def _rotate_sent_log(state_dir: Path, max_lines: int = MAX_SENT_LOG_LINES):
+    if max_lines <= 0:
+        return
+    sent = _state_paths(state_dir)["sent"]
+    if not sent.exists():
+        return
+    try:
+        lines = sent.read_text(encoding="utf-8").splitlines()
+    except Exception:
+        return
+    if len(lines) <= max_lines:
+        return
+    kept = lines[-max_lines:]
+    sent.write_text("\n".join(kept) + "\n", encoding="utf-8")
+
+
+def _prune_state_records(state: Dict[str, Any], pending: List[str], max_records: int = MAX_STATE_RECORDS) -> Dict[str, Any]:
+    if max_records <= 0 or len(state) <= max_records:
+        return state
+
+    pending_set = set([x for x in pending if x])
+    keep: Dict[str, Any] = {}
+
+    # Always keep pending entries.
+    for k in pending_set:
+        if k in state:
+            keep[k] = state[k]
+
+    # Fill remaining slots with most recently updated records.
+    remaining = max_records - len(keep)
+    if remaining <= 0:
+        return keep
+
+    candidates = []
+    for k, v in state.items():
+        if k in keep:
+            continue
+        ts = ""
+        if isinstance(v, dict):
+            ts = str(v.get("lastCheckedAt") or v.get("createdAt") or "")
+        candidates.append((ts, k, v))
+
+    candidates.sort(key=lambda x: x[0])
+    for _, k, v in candidates[-remaining:]:
+        keep[k] = v
+
+    return keep
+
+
 def _load_state(state_dir: Path):
     paths = _state_paths(state_dir)
     state = _safe_read_json(paths["state"], {})
@@ -76,6 +146,7 @@ def _load_state(state_dir: Path):
 def _save_state(state_dir: Path, state: Dict[str, Any], pending: List[str]):
     paths = _state_paths(state_dir)
     pending = sorted(set([x for x in pending if x]))
+    state = _prune_state_records(state, pending, MAX_STATE_RECORDS)
     _safe_write_json(paths["state"], state)
     _safe_write_json(paths["pending"], pending)
 
@@ -125,14 +196,20 @@ def _track_send(state_dir: Path, payload: Any, *, recipients: List[str], sender:
         "ts": utc_now(),
         "type": send_type,
         "messageGuid": guid,
-        "recipients": recipients,
-        "sender": sender,
-        "textPreview": text[:140],
+        "recipientCount": len(recipients),
         "dlrRequested": dlr_requested,
-        "callbackUrl": callback_url,
-        "response": payload,
     }
+    if YUBOTO_STORE_FULL_PAYLOAD:
+        send_log.update({
+            "recipients": recipients,
+            "sender": sender,
+            "textPreview": text[:140],
+            "callbackUrl": callback_url,
+            "response": payload,
+        })
+
     _append_sent(state_dir, send_log)
+    _rotate_sent_log(state_dir, MAX_SENT_LOG_LINES)
 
     if guid:
         state, pending = _load_state(state_dir)
@@ -142,14 +219,54 @@ def _track_send(state_dir: Path, payload: Any, *, recipients: List[str], sender:
             "lastCheckedAt": None,
             "lastStatus": "Submitted",
             "final": False,
-            "sender": sender,
-            "recipients": recipients,
-            "textPreview": text[:140],
-            "lastDlrPayload": None,
+            "recipientCount": len(recipients),
         }
+        if YUBOTO_STORE_FULL_PAYLOAD:
+            state[guid].update({
+                "sender": sender,
+                "recipients": recipients,
+                "textPreview": text[:140],
+                "lastDlrPayload": None,
+            })
         pending.append(guid)
         _save_state(state_dir, state, pending)
     return guid
+
+
+GSM_7BIT_BASIC = (
+    "@£$¥èéùìòÇ\nØø\rÅåΔ_ΦΓΛΩΠΨΣΘΞ"
+    " !\"#¤%&'()*+,-./0123456789:;<=>?¡"
+    "ABCDEFGHIJKLMNOPQRSTUVWXYZÄÖÑÜ§¿"
+    "abcdefghijklmnopqrstuvwxyzäöñüà"
+)
+GSM_7BIT_EXT = "^{}\\[~]|€"
+
+
+def _is_gsm7_text(text: str) -> bool:
+    allowed = set(GSM_7BIT_BASIC) | set(GSM_7BIT_EXT)
+    return all(ch in allowed for ch in text)
+
+
+def _sms_type_and_longsms(text: str, mode: str) -> tuple[Optional[str], Optional[bool]]:
+    m = (mode or "auto").strip().lower()
+    if m == "unicode":
+        return "unicode", True
+    if m == "gsm":
+        return "sms", True
+    # auto
+    if _is_gsm7_text(text):
+        return "sms", True
+    return "unicode", True
+
+
+def _chunked(items: List[str], size: int) -> List[List[str]]:
+    return [items[i:i + size] for i in range(0, len(items), size)]
+
+
+def _effective_batch_size(raw: int) -> int:
+    if raw <= 0:
+        return SAFE_DEFAULT_BATCH_SIZE
+    return min(raw, API_MAX_RECIPIENTS_PER_REQUEST)
 
 
 def cmd_send_sms(args, client: YubotoClient):
@@ -158,27 +275,58 @@ def cmd_send_sms(args, client: YubotoClient):
         print("ERROR: provide --to or set TEST_PHONENUMBER env var", file=sys.stderr)
         sys.exit(2)
 
-    payload = client.send_message(
-        contacts=recipients,
-        sms_text=args.text,
-        sms_sender=args.sender,
-        dlr=(not args.no_dlr),
-        callback_url=args.callback_url,
-    )
+    recipients = [r.strip() for r in recipients if (r or "").strip()]
+    if not recipients:
+        print("ERROR: recipient list is empty after normalization", file=sys.stderr)
+        sys.exit(2)
+
+    batch_size = _effective_batch_size(args.batch_size)
+    batches = _chunked(recipients, batch_size)
+
+    sms_type, sms_longsms = _sms_type_and_longsms(args.text, args.sms_encoding)
 
     state_dir = Path(args.state_dir)
-    _track_send(
-        state_dir,
-        payload,
-        recipients=recipients,
-        sender=args.sender,
-        text=args.text,
-        dlr_requested=(not args.no_dlr),
-        callback_url=args.callback_url,
-        send_type="send_sms",
-    )
+    out = []
+    for idx, batch in enumerate(batches, 1):
+        payload = client.send_message(
+            contacts=batch,
+            sms_text=args.text,
+            sms_sender=args.sender,
+            sms_type=sms_type,
+            sms_longsms=sms_longsms,
+            dlr=(not args.no_dlr),
+            callback_url=args.callback_url,
+        )
 
-    p(payload)
+        guid = _track_send(
+            state_dir,
+            payload,
+            recipients=batch,
+            sender=args.sender,
+            text=args.text,
+            dlr_requested=(not args.no_dlr),
+            callback_url=args.callback_url,
+            send_type="send_sms",
+        )
+
+        out.append({
+            "batch": idx,
+            "batchSize": len(batch),
+            "messageGuid": guid,
+            "response": payload,
+        })
+
+        if args.batch_delay_ms > 0 and idx < len(batches):
+            time.sleep(args.batch_delay_ms / 1000.0)
+
+    p({
+        "totalRecipients": len(recipients),
+        "batchSize": batch_size,
+        "batchCount": len(batches),
+        "smsEncodingRequested": args.sms_encoding,
+        "smsTypeUsed": sms_type,
+        "results": out,
+    })
 
 
 def cmd_send_csv(args, client: YubotoClient):
@@ -206,10 +354,13 @@ def cmd_send_csv(args, client: YubotoClient):
                 continue
 
             try:
+                sms_type, sms_longsms = _sms_type_and_longsms(text, args.sms_encoding)
                 payload = client.send_message(
                     contacts=[phone],
                     sms_text=text,
                     sms_sender=sender,
+                    sms_type=sms_type,
+                    sms_longsms=sms_longsms,
                     dlr=(not args.no_dlr),
                     callback_url=args.callback_url,
                 )
@@ -228,6 +379,9 @@ def cmd_send_csv(args, client: YubotoClient):
             except YubotoApiError as e:
                 failed += 1
                 results.append({"row": i, "ok": False, "to": phone, "error": str(e), "statusCode": e.status_code})
+
+            if args.delay_ms > 0:
+                time.sleep(args.delay_ms / 1000.0)
 
             if args.max_rows and (i >= args.max_rows):
                 break
@@ -253,7 +407,8 @@ def _poll_one(args, client: YubotoClient, guid: str) -> Dict[str, Any]:
     row["lastStatus"] = statuses[0] if statuses else "Unknown"
     row["allStatuses"] = statuses
     row["final"] = final
-    row["lastDlrPayload"] = dlr_payload
+    if YUBOTO_STORE_FULL_PAYLOAD:
+        row["lastDlrPayload"] = dlr_payload
     state[guid] = row
 
     if final:
@@ -347,7 +502,7 @@ def main():
     ap.add_argument("--api-key", help="Yuboto API key (or set OCTAPUSH_API_KEY)")
     ap.add_argument("--base-url", default="https://api.yuboto.com")
     ap.add_argument("--timeout", type=int, default=30)
-    ap.add_argument("--state-dir", default=str(Path(__file__).resolve().parents[1] / "state"), help="Directory for local send/status state")
+    ap.add_argument("--state-dir", default=str(_default_state_dir()), help="Directory for local send/status state (default: outside skill dir)")
 
     sub = ap.add_subparsers(dest="cmd", required=True)
 
@@ -361,7 +516,10 @@ def main():
     s = sub.add_parser("send-sms")
     s.add_argument("--to", action="append", help="Recipient contact. Repeat --to for many. Defaults to TEST_PHONENUMBER env var if omitted.")
     s.add_argument("--text", required=True)
-    s.add_argument("--sender", default=os.getenv("SMS_SENDER", "Yuboto"), help="SMS sender/originator")
+    s.add_argument("--sender", default=os.getenv("SMS_SENDER", "Yuboto"), help="SMS sender/originator (must be approved on account)")
+    s.add_argument("--batch-size", type=int, default=SAFE_DEFAULT_BATCH_SIZE, help="Recipients per API request (safe default 200, max 1000)")
+    s.add_argument("--batch-delay-ms", type=int, default=250, help="Delay between batches in milliseconds")
+    s.add_argument("--sms-encoding", choices=["auto", "unicode", "gsm"], default="auto", help="SMS encoding mode (default auto; unicode for Greek/Arabic/Chinese, gsm for GSM-7)")
     s.add_argument("--callback-url")
     s.add_argument("--no-dlr", action="store_true")
 
@@ -373,6 +531,8 @@ def main():
     sc.add_argument("--sender", default=os.getenv("SMS_SENDER", "Yuboto"), help="Default sender when sender-col not used")
     sc.add_argument("--delimiter", default=",", help="CSV delimiter (default ,)")
     sc.add_argument("--max-rows", type=int, default=0, help="Process only first N rows (0 = all)")
+    sc.add_argument("--delay-ms", type=int, default=100, help="Delay between CSV rows in milliseconds")
+    sc.add_argument("--sms-encoding", choices=["auto", "unicode", "gsm"], default="auto", help="SMS encoding mode for CSV rows")
     sc.add_argument("--callback-url")
     sc.add_argument("--no-dlr", action="store_true")
 
