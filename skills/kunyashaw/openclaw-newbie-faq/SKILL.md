@@ -1,8 +1,8 @@
 ---
 name: "openclaw-newbie-faq"
-version: "1.0.25"
+version: "1.0.43"
 displayName: "openclaw新手帮帮忙"
-description: "为刚接触 OpenCLAW 的新手提供完整指南。安装后请说"启动新手帮助"来启动34567端口的Web服务。源码：https://github.com/kunyashaw/openclaw-newbie-faq.git"
+description: "为刚接触 OpenClaw 的新手提供完整指南。安装后请说"启动新手帮助"来启动34567端口的Web服务。源码：https://github.com/kunyashaw/openclaw-newbie-faq.git"
 entryPoint:
   type: javascript
   path: "index.js"
@@ -11,6 +11,12 @@ triggers:
 ---
 
 # OpenClaw 新手帮帮忙
+
+## 服务启动说明
+
+安装完本skill之后，因为不会自动启动34567端口；和openclaw对话:'新手帮助',就会启动这个端口
+
+访问地址：http://localhost:34567
 
 ## 功能截图
 
@@ -21,25 +27,9 @@ triggers:
 ![命令大全](https://github.com/user-attachments/assets/80a71d51-6332-48a7-b814-aa7096c9e71c)
 
 ![调优建议](https://github.com/user-attachments/assets/521f5caf-b7e2-44c6-9840-5eda44704f11)
-
-## 服务启动说明
-
-当用户需要访问新手指南Web界面时，请执行以下命令启动服务：
-
-```bash
-cd ~/.openclaw/workspace/skills/openclaw-newbie-faq && node server.js
-```
-
-服务启动后访问地址：http://localhost:34567
-
-当用户不需要时，可以停止服务：
-```bash
-pkill -f "node.*openclaw-newbie-faq/server.js"
-```
-
 ## 简介
 
-这是一个专为 OpenCLAW 新手设计的技能包，提供体系化的学习指南，帮助用户快速上手 OpenCLAW。
+这是一个专为 OpenClaw 新手设计的技能包，提供体系化的学习指南，帮助用户快速上手 OpenClaw。
 
 ## 功能特性
 
@@ -82,15 +72,13 @@ pkill -f "node.*openclaw-newbie-faq/server.js"
 - **Skill 管理**：skills list、skills info、skills check、clawhub search、clawhub install
 - **更新升级**：update、--version
 
-### 4. 最佳实践
+### 4. 优化建议
 
-提供 Telegram 完整配置教程，包括：
-- 环境准备
-- 安装 OpenCLAW
-- 初始配置
-- 创建 Telegram Bot
-- 配置 Token
-- 配对与测试
+提供 OpenClaw 性能优化和最佳配置方案：
+- 调整 Gateway 配置提升响应速度
+- 优化 Token 使用降低 API 成本
+- 配置缓存提升查询效率
+- 模型参数调优建议
 
 ## 安装使用
 
@@ -102,7 +90,7 @@ npx clawhub install openclaw-newbie-faq
 
 ### 启动 Web 界面
 
-安装完成后，请对 OpenCLAW 说"启动新手帮助"，即可自动启动 Web 服务。
+安装完成后，请对 OpenClaw 说"启动新手帮助"，即可自动启动 Web 服务。
 
 或者手动启动：
 ```bash
@@ -137,9 +125,9 @@ chmod +x ~/start-openclaw-faq.sh
 
 ### 适合人群
 
-- 刚接触 OpenCLAW 的新手用户
+- 刚接触 OpenClaw 的新手用户
 - 想了解 AI 大模型行业的技术人员
-- 需要快速查找 OpenCLAW 命令的用户
+- 需要快速查找 OpenClaw 命令的用户
 - 遇到问题需要解决方案的用户
 
 ### 使用建议
@@ -147,7 +135,7 @@ chmod +x ~/start-openclaw-faq.sh
 1. **首次使用**：先浏览"大模型常识"，了解 AI 大模型行业
 2. **遇到问题**：查看"常见问题"，找到解决方案
 3. **查找命令**：使用"命令大全"，快速找到需要的命令
-4. **配置 Telegram**：参考"最佳实践"，完成 Telegram 配置
+4. **优化建议**：参考"优化建议"，提升 OpenClaw 性能
 
 ## 技术栈
 
@@ -155,23 +143,13 @@ chmod +x ~/start-openclaw-faq.sh
 - **后端**：Node.js + HTTP Server
 - **端口**：34567
 - **无需数据库**：纯静态文件服务
-
-## 更新日志
-
-### v1.0.1 (2024-01-XX)
-- 初始版本发布
-- 提供大模型常识双视角架构图
-- 包含 20 个常见问题解答
-- 包含 31 个常用命令
-- 提供 Telegram 最佳实践教程
-
 ## 反馈与支持
 
 如果您在使用过程中遇到问题或有建议，请：
 
-1. 访问 OpenCLAW 官方文档
-2. 在 GitHub 上提交 Issue
-3. 加入 OpenCLAW 社区讨论
+1. 访问 OpenClaw 官方文档
+2. 在 [GitHub](https://github.com/kunyashaw/openclaw-newbie-faq) 上提交 Issue
+3. 加入 OpenClaw 社区讨论
 
 ## 许可证
 

@@ -3,11 +3,16 @@
   "slug": "openclaw-newbie-faq",
   "displayName": "Openclaw",
   "latest": {
-    "version": "1.0.25",
-    "publishedAt": 1772548245520,
-    "commit": "https://github.com/openclaw/skills/commit/cedf7b88961a5474004a9b0b3b391c87b1b8125a"
+    "version": "1.0.43",
+    "publishedAt": 1772600486340,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.25",
+      "publishedAt": 1772548245520,
+      "commit": "https://github.com/openclaw/skills/commit/cedf7b88961a5474004a9b0b3b391c87b1b8125a"
+    },
     {
       "version": "1.0.24",
       "publishedAt": 1772548086435,

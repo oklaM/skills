@@ -1,4 +1,4 @@
-// OpenCLAW 新手指南 - 主要 JavaScript 功能
+// OpenClaw 新手指南 - 主要 JavaScript 功能
 
 document.addEventListener('DOMContentLoaded', function() {
     // 默认选中"大模型常识"标签
@@ -95,7 +95,7 @@ const industryDetails = {
         detail: 'AI 应用框架封装了模型调用、Prompt 管理、Agent 编排等通用功能，让开发者专注于业务逻辑。',
         examples: [
             'LangChain：最流行的 LLM 应用开发框架',
-            'OpenCLAW：个人 AI 助手网关',
+            'OpenClaw：个人 AI 助手网关',
             'AutoGPT：自主 Agent 框架',
             'Dify：低代码 AI 应用开发平台'
         ],
@@ -585,9 +585,9 @@ function initFAQ() {
     const faqData = [
         {
             category: 'install',
-            question: '安装 OpenCLAW 时提示 "command not found"',
+            question: '安装 OpenClaw 时提示 "command not found"',
             answer: `
-                <p><strong>原因：</strong>OpenCLAW 未正确安装或 PATH 配置问题。</p>
+                <p><strong>原因：</strong>OpenClaw 未正确安装或 PATH 配置问题。</p>
                 <div class="tip-box">
                     <i class="fas fa-lightbulb"></i>
                     <p><strong>解决方案：</strong></p>
@@ -620,7 +620,7 @@ function initFAQ() {
             category: 'install',
             question: 'Node.js 版本不兼容',
             answer: `
-                <p><strong>原因：</strong>OpenCLAW 需要 Node.js 22 或更高版本。</p>
+                <p><strong>原因：</strong>OpenClaw 需要 Node.js 22 或更高版本。</p>
                 <div class="tip-box">
                     <i class="fas fa-lightbulb"></i>
                     <p><strong>解决方案：</strong></p>
@@ -789,7 +789,7 @@ function initFAQ() {
             category: 'channel',
             question: '如何配置多个 Telegram Bot',
             answer: `
-                <p><strong>说明：</strong>OpenCLAW 支持配置多个频道。</p>
+                <p><strong>说明：</strong>OpenClaw 支持配置多个频道。</p>
                 <div class="tip-box">
                     <i class="fas fa-lightbulb"></i>
                     <p><strong>配置步骤：</strong></p>
@@ -874,7 +874,7 @@ function initFAQ() {
             category: 'config',
             question: '如何切换不同的 AI 模型',
             answer: `
-                <p><strong>说明：</strong>OpenCLAW 支持多种 AI 模型。</p>
+                <p><strong>说明：</strong>OpenClaw 支持多种 AI 模型。</p>
                 <div class="tip-box">
                     <i class="fas fa-lightbulb"></i>
                     <p><strong>切换方法：</strong></p>
@@ -891,7 +891,7 @@ function initFAQ() {
             category: 'skill',
             question: '如何安装和使用 Skill',
 answer: `
-                <p><strong>说明：</strong>Skill 是扩展 OpenCLAW 功能的插件。</p>
+                <p><strong>说明：</strong>Skill 是扩展 OpenClaw 功能的插件。</p>
                 <div class="tip-box">
                     <i class="fas fa-lightbulb"></i>
                     <p><strong>使用步骤：</strong></p>
@@ -907,7 +907,7 @@ answer: `
             category: 'skill',
             question: '如何开发自定义 Skill',
             answer: `
-                <p><strong>说明：</strong>OpenCLAW 支持自定义 Skill 开发。</p>
+                <p><strong>说明：</strong>OpenClaw 支持自定义 Skill 开发。</p>
                 <div class="tip-box">
                     <i class="fas fa-lightbulb"></i>
                     <p><strong>开发步骤：</strong></p>
@@ -1291,7 +1291,7 @@ const termDetails = {
         examples: [
             '例子：天气查询 Skill、翻译 Skill、代码执行 Skill',
             '作用：扩展 AI 的能力边界',
-            'OpenCLAW：支持自定义 Skill'
+            'OpenClaw：支持自定义 Skill'
         ],
         whyMatters: '有了 Skill，AI 就不只是聊天，还能真正帮你干活！'
     },
@@ -1320,7 +1320,7 @@ const termDetails = {
             '特点：能对话、能创作、能推理',
             '局限：可能会"胡说八道"（幻觉）'
         ],
-        whyMatters: '大模型是当前 AI 的核心，OpenCLAW 就是帮你用上这些大模型。'
+        whyMatters: '大模型是当前 AI 的核心，OpenClaw 就是帮你用上这些大模型。'
     },
     neural: {
         title: '神经网络',
@@ -1342,11 +1342,11 @@ const termDetails = {
         simple: '程序之间"说话"的方式。',
         detail: 'API 就像餐厅的菜单，告诉你有哪些菜可以点，怎么点。程序通过 API 调用其他程序的功能。',
         examples: [
-            'OpenCLAW 通过 API 调用 AI 模型',
+            'OpenClaw 通过 API 调用 AI 模型',
             '你需要 API Key 才能使用 AI 服务',
             '就像餐厅需要会员卡才能点菜'
         ],
-        whyMatters: '理解 API 就明白为什么需要配置 API Key，以及 OpenCLAW 是怎么工作的。'
+        whyMatters: '理解 API 就明白为什么需要配置 API Key，以及 OpenClaw 是怎么工作的。'
     },
     'api-key': {
         title: 'API Key（密钥）',
@@ -1356,7 +1356,7 @@ const termDetails = {
         detail: 'API Key 是一串字符，用来证明你有权限使用某个 AI 服务。就像密码一样，要保密！',
         examples: [
             '从 AI 服务商官网获取（如 Anthropic、OpenAI）',
-            '配置到 OpenCLAW 中才能使用',
+            '配置到 OpenClaw 中才能使用',
             '按使用量计费，就像手机话费'
         ],
         warning: '不要把 API Key 发给别人，也不要上传到公开的代码仓库！',
@@ -1364,9 +1364,9 @@ const termDetails = {
     },
     gateway: {
         title: 'Gateway（网关）',
-        subtitle: 'OpenCLAW 的"心脏"',
+        subtitle: 'OpenClaw 的"心脏"',
         icon: 'fas fa-door-open',
-        simple: 'OpenCLAW 的"心脏"，负责所有中转工作。',
+        simple: 'OpenClaw 的"心脏"，负责所有中转工作。',
         detail: 'Gateway 是一个后台服务，负责连接 AI 模型（通过 API）、连接聊天软件（Telegram、WhatsApp 等）、中转消息、管理配置和日志等。',
         examples: [
             '连接 AI 模型（通过 API）',

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>OpenCLAW 新手指南</title>
+    <title>OpenClaw 新手指南</title>
     <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
@@ -13,35 +13,32 @@
         <header class="header">
             <div class="logo">
                 <i class="fas fa-robot"></i>
-                <h1>OpenCLAW 新手指南</h1>
+                <h1>OpenClaw 新手指南</h1>
             </div>
-            <p class="subtitle">为刚接触 OpenCLAW 的新手提供完整指南</p>
+            <p class="subtitle">为刚接触 OpenClaw 的新手提供完整指南</p>
         </header>
 
-            </div>
-        </div>
-
-        <!-- 功能优先级标签 -->
+        <!-- 功能标签 -->
         <div class="priority-tabs">
-            <button class="tab-btn active" data-tab="basics" data-priority="high">
+            <button class="tab-btn active" data-tab="basics">
                 <i class="fas fa-book"></i>
                 <span>大模型常识</span>
-                <span class="priority-badge high">高优先级</span>
             </button>
-            <button class="tab-btn" data-tab="faq" data-priority="high">
+            <button class="tab-btn" data-tab="openclaw">
+                <i class="fas fa-sitemap"></i>
+                <span>OpenClaw架构和目录介绍</span>
+            </button>
+            <button class="tab-btn" data-tab="faq">
                 <i class="fas fa-question-circle"></i>
                 <span>常见问题</span>
-                <span class="priority-badge high">高优先级</span>
             </button>
-            <button class="tab-btn" data-tab="commands" data-priority="medium">
+            <button class="tab-btn" data-tab="commands">
                 <i class="fas fa-terminal"></i>
                 <span>命令大全</span>
-                <span class="priority-badge medium">中优先级</span>
             </button>
-            <button class="tab-btn" data-tab="best-practice" data-priority="medium">
-                <i class="fas fa-star"></i>
-                <span>最佳实践</span>
-                <span class="priority-badge medium">中优先级</span>
+            <button class="tab-btn" data-tab="optimization">
+                <i class="fas fa-clipboard-check"></i>
+                <span>推荐规范与实践</span>
             </button>
         </div>
 
@@ -101,7 +98,7 @@
         </div>
 
                     <h2><i class="fas fa-book"></i> 大模型常识</h2>
-                    <p class="basics-intro">从产业视角和工程视角，体系化了解 AI 大模型行业</p>
+                    <p class="basics-intro">从产业视角、工程视角和 OpenClaw 架构，体系化了解 AI 大模型行业</p>
                     
                     <!-- 视角切换 -->
                     <div class="perspective-switcher">
@@ -159,7 +156,7 @@
                                     <div class="chain-module" onclick="showIndustryDetail('ai-framework')">
                                         <div class="module-icon"><i class="fas fa-puzzle-piece"></i></div>
                                         <div class="module-name">AI应用框架</div>
-                                        <div class="module-example">LangChain、OpenCLAW</div>
+                                        <div class="module-example">LangChain、OpenClaw</div>
                                     </div>
                                     <div class="chain-module" onclick="showIndustryDetail('vector-db')">
                                         <div class="module-icon"><i class="fas fa-database"></i></div>
@@ -398,7 +395,167 @@
                 </div>
             </section>
 
-            <!-- 功能2: FAQ常见问题 -->
+            <!-- OpenClaw 架构和目录介绍 -->
+            <section id="openclaw" class="tab-content">
+                <div class="card">
+                    <h2><i class="fas fa-sitemap"></i> OpenClaw 架构和目录介绍</h2>
+                    
+                    <div class="openclaw-arch">
+                        <h3><i class="fas fa-sitemap"></i> OpenClaw 层级架构</h3>
+                        <div class="arch-layers">
+                            <div class="arch-layer layer-app">
+                                <div class="layer-num">L7</div>
+                                <div class="layer-info">
+                                    <h4>应用层 (Application)</h4>
+                                    <p>Skill、Bot、Dashboard 等用户交互界面</p>
+                                </div>
+                            </div>
+                            <div class="arch-layer layer-agent">
+                                <div class="layer-num">L6</div>
+                                <div class="layer-info">
+                                    <h4>Agent 层</h4>
+                                    <p>任务规划、工具编排、多模型协作</p>
+                                </div>
+                            </div>
+                            <div class="arch-layer layer-model">
+                                <div class="layer-num">L5</div>
+                                <div class="layer-info">
+                                    <h4>模型层 (Model)</h4>
+                                    <p>多模型接入（Claude、GPT、Gemini 等）</p>
+                                </div>
+                            </div>
+                            <div class="arch-layer layer-memory">
+                                <div class="layer-num">L4</div>
+                                <div class="layer-info">
+                                    <h4>记忆层 (Memory)</h4>
+                                    <p>向量数据库、长期记忆、会话管理</p>
+                                </div>
+                            </div>
+                            <div class="arch-layer layer-gateway">
+                                <div class="layer-num">L3</div>
+                                <div class="layer-info">
+                                    <h4>Gateway 层</h4>
+                                    <p>请求路由、限流、认证、会话管理</p>
+                                </div>
+                            </div>
+                            <div class="arch-layer layer-channel">
+                                <div class="layer-num">L2</div>
+                                <div class="layer-info">
+                                    <h4>频道层 (Channel)</h4>
+                                    <p>Telegram、Discord、Slack、Web 等接入</p>
+                                </div>
+                            </div>
+                            <div class="arch-layer layer-core">
+                                <div class="layer-num">L1</div>
+                                <div class="layer-info">
+                                    <h4>核心层 (Core)</h4>
+                                    <p>配置管理、日志、监控、插件系统</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="openclaw-config">
+                        <h3><i class="fas fa-folder-tree"></i> 配置目录说明</h3>
+                        <div class="config-tree">
+                            <div class="config-item">
+                                <div class="config-path"><i class="fas fa-folder"></i> ~/.openclaw/</div>
+                                <div class="config-desc">OpenClaw 主目录，所有数据存储位置</div>
+                            </div>
+                            <div class="config-item">
+                                <div class="config-path"><i class="fas fa-file-code"></i> openclaw.json</div>
+                                <div class="config-desc">主配置文件，包含 API Key、模型选择、频道配置等</div>
+                            </div>
+                            <div class="config-item">
+                                <div class="config-path"><i class="fas fa-folder"></i> workspace/</div>
+                                <div class="config-desc">工作区目录，存放 Skill、项目文件和数据</div>
+                            </div>
+                            <div class="config-item sub">
+                                <div class="config-path"><i class="fas fa-file"></i> soul.md</div>
+                                <div class="config-desc">行为宪法：定义 AI 身份、能力、风格、底线</div>
+                            </div>
+                            <div class="config-item sub">
+                                <div class="config-path"><i class="fas fa-file"></i> USER.md</div>
+                                <div class="config-desc">用户画像：用户背景、偏好、沟通风格</div>
+                            </div>
+                            <div class="config-item sub">
+                                <div class="config-path"><i class="fas fa-file"></i> IDENTITY.md</div>
+                                <div class="config-desc">身份定义：AI 角色设定、行为准则</div>
+                            </div>
+                            <div class="config-item sub">
+                                <div class="config-path"><i class="fas fa-file"></i> memory.md</div>
+                                <div class="config-desc">长期记忆：工作方法论、用户偏好、项目背景</div>
+                            </div>
+                            <div class="config-item sub">
+                                <div class="config-path"><i class="fas fa-file"></i> agents.md</div>
+                                <div class="config-desc">工作流规范：工具使用、协作机制、错误处理</div>
+                            </div>
+                            <div class="config-item sub">
+                                <div class="config-path"><i class="fas fa-folder"></i> skills/</div>
+                                <div class="config-desc">已安装的 Skill 集合</div>
+                            </div>
+                            <div class="config-item sub sub2">
+                                <div class="config-path"><i class="fas fa-folder"></i> &lt;skill-name&gt;/</div>
+                                <div class="config-desc">单个 Skill 目录</div>
+                            </div>
+                            <div class="config-item sub sub2">
+                                <div class="config-path"><i class="fas fa-file"></i> skill.json</div>
+                                <div class="config-desc">Skill 元信息配置</div>
+                            </div>
+                            <div class="config-item sub sub2">
+                                <div class="config-path"><i class="fas fa-file"></i> index.js</div>
+                                <div class="config-desc">Skill 入口文件，定义激活/停用逻辑</div>
+                            </div>
+                            <div class="config-item sub sub2">
+                                <div class="config-path"><i class="fas fa-file"></i> server.js</div>
+                                <div class="config-desc">Skill Web 服务入口（如有独立服务）</div>
+                            </div>
+                            <div class="config-item sub sub2">
+                                <div class="config-path"><i class="fas fa-folder"></i> web/</div>
+                                <div class="config-desc">Web 静态资源（HTML/CSS/JS/图片）</div>
+                            </div>
+                            <div class="config-item sub">
+                                <div class="config-path"><i class="fas fa-folder"></i> memory/</div>
+                                <div class="config-desc">向量数据存储与日期记忆文件</div>
+                            </div>
+                            <div class="config-item sub sub2">
+                                <div class="config-path"><i class="fas fa-file"></i> YYYY-MM-DD.md</div>
+                                <div class="config-desc">按日期维度的记忆文件</div>
+                            </div>
+                            <div class="config-item sub sub2">
+                                <div class="config-path"><i class="fas fa-database"></i> vector/</div>
+                                <div class="config-desc">向量数据库存储（Chroma 等）</div>
+                            </div>
+                            <div class="config-item">
+                                <div class="config-path"><i class="fas fa-folder"></i> logs/</div>
+                                <div class="config-desc">日志目录</div>
+                            </div>
+                            <div class="config-item sub sub2">
+                                <div class="config-path"><i class="fas fa-file"></i> openclaw.log</div>
+                                <div class="config-desc">主程序运行日志</div>
+                            </div>
+                            <div class="config-item sub sub2">
+                                <div class="config-path"><i class="fas fa-file"></i> gateway.log</div>
+                                <div class="config-desc">Gateway 运行日志</div>
+                            </div>
+                            <div class="config-item sub sub2">
+                                <div class="config-path"><i class="fas fa-file"></i> error.log</div>
+                                <div class="config-desc">错误日志</div>
+                            </div>
+                            <div class="config-item">
+                                <div class="config-path"><i class="fas fa-file"></i> gateway.pid</div>
+                                <div class="config-desc">Gateway 进程 ID 文件</div>
+                            </div>
+                            <div class="config-item">
+                                <div class="config-path"><i class="fas fa-file"></i> gateway.sock</div>
+                                <div class="config-desc">Gateway Unix Socket 文件，Gateway 与 CLI 之间的 IPC 通信</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- FAQ常见问题 -->
             <section id="faq" class="tab-content">
                 <div class="card">
                     <h2><i class="fas fa-life-ring"></i> 常见问题解答</h2>
@@ -446,427 +603,220 @@
                 </div>
             </section>
 
-            <!-- 功能4: 最佳实践 - Telegram完整教程 -->
-            <section id="best-practice" class="tab-content">
+            <!-- 推荐规范与实践 -->
+            <section id="optimization" class="tab-content">
                 <div class="card">
-                    <h2><i class="fab fa-telegram"></i> Telegram 最佳实践</h2>
-                    <p class="practice-intro">完整的从安装 OpenCLAW 到配置 Telegram 的详细教程</p>
+                    <h2><i class="fas fa-clipboard-check"></i> 推荐规范与实践</h2>
+                    <p class="practice-intro">OpenClaw 知识库组织规范与最佳实践</p>
                     
-                    <div class="progress-tracker">
-                        <div class="progress-bar">
-                            <div class="progress-fill" id="progress-fill"></div>
+                    <div class="optimization-grid">
+                        <div class="optimization-card">
+                            <div class="opt-icon"><i class="fas fa-user"></i></div>
+                            <h3>soul.md 行为宪法</h3>
+                            <ul>
+                                <li><strong>你是谁</strong>：定义 AI 助手的身份定位和角色</li>
+                                <li><strong>你的能力</strong>：明确技能范围、技术栈、擅长领域</li>
+                                <li><strong>你的风格</strong>：设定交流语气、回复风格、沟通习惯</li>
+                                <li><strong>你的底线</strong>：划定红线、禁止行为、伦理边界</li>
+                            </ul>
                         </div>
-                        <div class="progress-steps">
-                            <div class="step active" data-step="1">
-                                <span class="step-num">1</span>
-                                <span class="step-title">环境准备</span>
-                            </div>
-                            <div class="step" data-step="2">
-                                <span class="step-num">2</span>
-                                <span class="step-title">安装OpenCLAW</span>
-                            </div>
-                            <div class="step" data-step="3">
-                                <span class="step-num">3</span>
-                                <span class="step-title">初始配置</span>
-                            </div>
-                            <div class="step" data-step="4">
-                                <span class="step-num">4</span>
-                                <span class="step-title">创建Telegram Bot</span>
-                            </div>
-                            <div class="step" data-step="5">
-                                <span class="step-num">5</span>
-                                <span class="step-title">配置Token</span>
-                            </div>
-                            <div class="step" data-step="6">
-                                <span class="step-num">6</span>
-                                <span class="step-title">配对与测试</span>
-                            </div>
+                        
+                        <div class="optimization-card">
+                            <div class="opt-icon"><i class="fas fa-brain"></i></div>
+                            <h3>memory.md 记忆管理</h3>
+                            <ul>
+                                <li><strong>长期记忆</strong>：记录工作方法论、用户偏好、项目背景</li>
+                                <li><strong>日期记忆</strong>：memory/YYYY-MM-DD.md 按日期维度组织</li>
+                                <li><strong>会话记忆</strong>：按会话维度记录上下文</li>
+                                <li><strong>记忆更新</strong>：定期回顾和清理过时信息</li>
+                            </ul>
                         </div>
-                    </div>
-
-                    <div class="practice-content">
-                        <!-- 步骤1: 环境准备 -->
-                        <div class="practice-step active" id="step-1">
-                            <h3><i class="fas fa-check-circle"></i> 步骤 1: 环境准备</h3>
-                            <div class="step-content">
-                                <div class="requirements">
-                                    <h4>系统要求</h4>
-                                    <ul class="checklist">
-                                        <li><i class="fas fa-check"></i> Node.js ≥ 22.x</li>
-                                        <li><i class="fas fa-check"></i> 内存 ≥ 2GB (推荐 4GB+)</li>
-                                        <li><i class="fas fa-check"></i> 磁盘空间 ≥ 1GB (推荐 5GB+)</li>
-                                        <li><i class="fas fa-check"></i> 能访问国际互联网</li>
-                                    </ul>
-                                </div>
-                                <div class="action-box">
-                                    <h4>安装 Node.js 22</h4>
-                                    <div class="code-block">
-                                        <pre><code># 使用 nvm 安装 Node.js 22
-curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh | bash
-source ~/.zshrc  # 或 source ~/.bashrc
-nvm install 22
-nvm use 22
-nvm alias default 22
-
-# 验证安装
-node --version  # 应显示 v22.x.x</code></pre>
-                                        <button class="copy-btn" onclick="copyCode(this)">
-                                            <i class="fas fa-copy"></i>
-                                        </button>
-                                    </div>
-                                </div>
-                                <div class="tip-box">
-                                    <i class="fas fa-lightbulb"></i>
-                                    <p><strong>提示：</strong>国内用户建议提前配置好代理，确保能顺利访问 npm 和 OpenCLAW 相关服务。</p>
-                                </div>
-                            </div>
-                            <div class="step-actions">
-                                <button class="btn btn-secondary" onclick="nextStep(2)">下一步 <i class="fas fa-arrow-right"></i></button>
-                            </div>
+                        
+                        <div class="optimization-card">
+                            <div class="opt-icon"><i class="fas fa-robot"></i></div>
+                            <h3>agents.md 工作流规范</h3>
+                            <ul>
+                                <li><strong>工作流定义</strong>：记录自动化任务流程和执行顺序</li>
+                                <li><strong>工具规范</strong>：定义工具使用场景、参数、返回值格式</li>
+                                <li><strong>协作机制</strong>：多 Agent 协作模式与通信协议</li>
+                                <li><strong>错误处理</strong>：异常捕获、降级策略、重试逻辑</li>
+                            </ul>
+                        </div>
+                        
+                        <div class="optimization-card">
+                            <div class="opt-icon"><i class="fas fa-layer-group"></i></div>
+                            <h3>模型分组调用</h3>
+                            <ul>
+                                <li><strong>简单任务</strong>：使用轻量模型（如 claude-sonnet-4-20250514）</li>
+                                <li><strong>复杂推理</strong>：使用强力模型（如 claude-opus-4-5-20251114）</li>
+                                <li><strong>代码任务</strong>：使用代码优化模型</li>
+                                <li><strong>成本控制</strong>：根据任务难度自动选择模型</li>
+                            </ul>
                         </div>
 
-                        <!-- 步骤2: 安装OpenCLAW -->
-                        <div class="practice-step" id="step-2">
-                            <h3><i class="fas fa-download"></i> 步骤 2: 安装 OpenCLAW</h3>
-                            <div class="step-content">
-                                <div class="install-options">
-                                    <div class="install-option recommended">
-                                        <span class="badge">推荐</span>
-                                        <h4>方式一：一键安装脚本</h4>
-                                        <div class="code-block">
-                                            <pre><code># macOS / Linux
-curl -fsSL https://openclaw.ai/install.sh | bash</code></pre>
-                                            <button class="copy-btn" onclick="copyCode(this)">
-                                                <i class="fas fa-copy"></i>
-                                            </button>
-                                        </div>
-                                    </div>
-                                    <div class="install-option">
-                                        <h4>方式二：NPM 全局安装</h4>
-                                        <div class="code-block">
-                                            <pre><code># 使用 npm
-npm install -g openclaw@latest
-
-# 或使用 pnpm (推荐)
-pnpm add -g openclaw@latest</code></pre>
-                                            <button class="copy-btn" onclick="copyCode(this)">
-                                                <i class="fas fa-copy"></i>
-                                            </button>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="action-box">
-                                    <h4>验证安装</h4>
-                                    <div class="code-block">
-                                        <pre><code># 检查版本
-openclaw --version
-
-# 查看帮助
-openclaw --help</code></pre>
-                                        <button class="copy-btn" onclick="copyCode(this)">
-                                            <i class="fas fa-copy"></i>
-                                        </button>
-                                    </div>
-                                </div>
-                                <div class="warning-box">
-                                    <i class="fas fa-exclamation-triangle"></i>
-                                    <p><strong>注意：</strong>如果提示 command not found，请关闭终端重新打开，或检查 PATH 配置。</p>
-                                </div>
-                            </div>
-                            <div class="step-actions">
-                                <button class="btn btn-outline" onclick="prevStep(1)"><i class="fas fa-arrow-left"></i> 上一步</button>
-                                <button class="btn btn-secondary" onclick="nextStep(3)">下一步 <i class="fas fa-arrow-right"></i></button>
-                            </div>
+                        <div class="optimization-card">
+                            <div class="opt-icon"><i class="fas fa-cogs"></i></div>
+                            <h3>Session 会话管理</h3>
+                            <ul>
+                                <li>配置 <code>session.reset</code> 设置会话重置策略（daily/idle）</li>
+                                <li>使用 <code>session.idleMinutes</code> 控制空闲超时</li>
+                                <li>通过 <code>session.sendPolicy</code> 控制消息发送策略</li>
+                                <li>利用 <code>compaction</code> 管理长会话压缩</li>
+                            </ul>
                         </div>
 
-                        <!-- 步骤3: 初始配置 -->
-                        <div class="practice-step" id="step-3">
-                            <h3><i class="fas fa-cog"></i> 步骤 3: 初始配置</h3>
-                            <div class="step-content">
-                                <div class="action-box">
-                                    <h4>启动配置向导</h4>
-                                    <div class="code-block">
-                                        <pre><code># 启动交互式配置向导并安装后台服务
-openclaw onboard --install-daemon</code></pre>
-                                        <button class="copy-btn" onclick="copyCode(this)">
-                                            <i class="fas fa-copy"></i>
-                                        </button>
-                                    </div>
-                                </div>
-                                <div class="config-steps">
-                                    <h4>配置向导步骤</h4>
-                                    <div class="config-step-item">
-                                        <span class="num">1</span>
-                                        <div class="detail">
-                                            <strong>Gateway 模式</strong>
-                                            <p>选择 <code>Local</code>（99% 用户的选择）</p>
-                                        </div>
-                                    </div>
-                                    <div class="config-step-item">
-                                        <span class="num">2</span>
-                                        <div class="detail">
-                                            <strong>认证方式</strong>
-                                            <p>选择 <code>Anthropic (API key)</code> 或 <code>OpenAI (API key)</code></p>
-                                        </div>
-                                    </div>
-                                    <div class="config-step-item">
-                                        <span class="num">3</span>
-                                        <div class="detail">
-                                            <strong>默认 AI 模型</strong>
-                                            <p>推荐选择 <code>claude-3-sonnet</code>（平衡速度、智能和成本）</p>
-                                        </div>
-                                    </div>
-                                    <div class="config-step-item">
-                                        <span class="num">4</span>
-                                        <div class="detail">
-                                            <strong>配置聊天频道</strong>
-                                            <p>使用空格键选择 <code>Telegram</code>（暂时跳过详细配置）</p>
-                                        </div>
-                                    </div>
-                                    <div class="config-step-item">
-                                        <span class="num">5</span>
-                                        <div class="detail">
-                                            <strong>工作区设置</strong>
-                                            <p>保持默认 <code>~/.openclaw/workspace</code></p>
-                                        </div>
-                                    </div>
-                                    <div class="config-step-item">
-                                        <span class="num">6</span>
-                                        <div class="detail">
-                                            <strong>安装后台服务</strong>
-                                            <p>输入 <code>y</code> 确认安装</p>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="tip-box">
-                                    <i class="fas fa-lightbulb"></i>
-                                    <p><strong>提示：</strong>配置完成后，所有设置保存在 <code>~/.openclaw/openclaw.json</code> 文件中。</p>
-                                </div>
-                            </div>
-                            <div class="step-actions">
-                                <button class="btn btn-outline" onclick="prevStep(2)"><i class="fas fa-arrow-left"></i> 上一步</button>
-                                <button class="btn btn-secondary" onclick="nextStep(4)">下一步 <i class="fas fa-arrow-right"></i></button>
-                            </div>
+                        <div class="optimization-card">
+                            <div class="opt-icon"><i class="fas fa-network-wired"></i></div>
+                            <h3>网络与安全</h3>
+                            <ul>
+                                <li>配置代理解决国际网络访问问题</li>
+                                <li>启用 <code>retry</code> 自动重试失败请求</li>
+                                <li>设置 API Key 环境变量保障安全</li>
+                                <li>配置请求并发限制防止 API 限流</li>
+                            </ul>
                         </div>
 
-                        <!-- 步骤4: 创建Telegram Bot -->
-                        <div class="practice-step" id="step-4">
-                            <h3><i class="fab fa-telegram-plane"></i> 步骤 4: 创建 Telegram Bot</h3>
-                            <div class="step-content">
-                                <div class="telegram-steps">
-                                    <div class="tg-step">
-                                        <div class="tg-step-num">1</div>
-                                        <div class="tg-step-content">
-                                            <h4>找到 BotFather</h4>
-                                            <p>在 Telegram 中搜索 <strong>@BotFather</strong> 并开始对话</p>
-                                            <div class="screenshot-hint">
-                                                <i class="fas fa-search"></i>
-                                                <span>搜索 "BotFather"，选择带有蓝色认证勾的账号</span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="tg-step">
-                                        <div class="tg-step-num">2</div>
-                                        <div class="tg-step-content">
-                                            <h4>创建新 Bot</h4>
-                                            <p>发送命令 <code>/newbot</code></p>
-                                            <div class="code-block small">
-                                                <pre><code>/newbot</code></pre>
-                                                <button class="copy-btn" onclick="copyCode(this)">
-                                                    <i class="fas fa-copy"></i>
-                                                </button>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="tg-step">
-                                        <div class="tg-step-num">3</div>
-                                        <div class="tg-step-content">
-                                            <h4>设置 Bot 名称</h4>
-                                            <p>按照提示输入 Bot 的显示名称（如：MyClawBot）</p>
-                                        </div>
-                                    </div>
-                                    <div class="tg-step">
-                                        <div class="tg-step-num">4</div>
-                                        <div class="tg-step-content">
-                                            <h4>设置用户名</h4>
-                                            <p>设置唯一的用户名，<strong>必须以 bot 结尾</strong>（如：my_claw_bot）</p>
-                                            <div class="example-box">
-                                                <i class="fas fa-check-circle"></i>
-                                                <span>可用：myclaw_bot, openclaw_helper_bot</span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="tg-step">
-                                        <div class="tg-step-num">5</div>
-                                        <div class="tg-step-content">
-                                            <h4>获取 API Token</h4>
-                                            <p>BotFather 会回复包含 HTTP API Token 的消息</p>
-                                            <div class="token-example">
-                                                <i class="fas fa-key"></i>
-                                                <code>123456789:ABCdefGHIjklMNOpqrSTUvwxyz</code>
-                                            </div>
-                                            <div class="warning-box">
-                                                <i class="fas fa-exclamation-triangle"></i>
-                                                <p><strong>重要：</strong>请妥善保管这个 Token，不要分享给他人！</p>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="step-actions">
-                                <button class="btn btn-outline" onclick="prevStep(3)"><i class="fas fa-arrow-left"></i> 上一步</button>
-                                <button class="btn btn-secondary" onclick="nextStep(5)">下一步 <i class="fas fa-arrow-right"></i></button>
-                            </div>
+                        <div class="optimization-card">
+                            <div class="opt-icon"><i class="fas fa-heartbeat"></i></div>
+                            <h3>Heartbeat 心跳配置</h3>
+                            <ul>
+                                <li>使用 <code>heartbeat.every</code> 设置检查间隔</li>
+                                <li>配置 <code>heartbeat.activeHours</code> 限定活跃时段</li>
+                                <li>通过 <code>heartbeat.prompt</code> 自定义检查任务</li>
+                                <li>利用 <code>heartbeat.target</code> 指定消息推送目标</li>
+                            </ul>
                         </div>
 
-                        <!-- 步骤5: 配置Token -->
-                        <div class="practice-step" id="step-5">
-                            <h3><i class="fas fa-plug"></i> 步骤 5: 配置 Token 到 OpenCLAW</h3>
-                            <div class="step-content">
-                                <div class="action-box">
-                                    <h4>配置 Telegram Token</h4>
-                                    <div class="code-block">
-                                        <pre><code># 打开 Telegram 频道配置
-openclaw configure --section channels.telegram</code></pre>
-                                        <button class="copy-btn" onclick="copyCode(this)">
-                                            <i class="fas fa-copy"></i>
-                                        </button>
-                                    </div>
-                                </div>
-                                <div class="config-guide">
-                                    <h4>配置步骤</h4>
-                                    <ol>
-                                        <li>运行上述命令后，会打开交互式编辑器</li>
-                                        <li>找到 <code>token</code> 字段</li>
-                                        <li>粘贴从 BotFather 获取的 API Token</li>
-                                        <li>保存并退出（通常按 Ctrl+X，然后确认）</li>
-                                    </ol>
-                                </div>
-                                <div class="config-preview">
-                                    <h4>配置示例</h4>
-                                    <div class="code-block">
-                                        <pre><code>{
-  "channels": {
-    "telegram": {
-      "enabled": true,
-      "token": "123456789:ABCdefGHIjklMNOpqrSTUvwxyz",
-      "dmPolicy": "pairing"
-    }
-  }
-}</code></pre>
-                                        <button class="copy-btn" onclick="copyCode(this)">
-                                            <i class="fas fa-copy"></i>
-                                        </button>
-                                    </div>
-                                </div>
-                                <div class="action-box">
-                                    <h4>重启 Gateway 使配置生效</h4>
-                                    <div class="code-block">
-                                        <pre><code>openclaw gateway restart</code></pre>
-                                        <button class="copy-btn" onclick="copyCode(this)">
-                                            <i class="fas fa-copy"></i>
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="step-actions">
-                                <button class="btn btn-outline" onclick="prevStep(4)"><i class="fas fa-arrow-left"></i> 上一步</button>
-                                <button class="btn btn-secondary" onclick="nextStep(6)">下一步 <i class="fas fa-arrow-right"></i></button>
-                            </div>
+                        <div class="optimization-card">
+                            <div class="opt-icon"><i class="fas fa-tasks"></i></div>
+                            <h3>Cron 定时任务</h3>
+                            <ul>
+                                <li>使用 <code>cron.enabled</code> 启用定时任务</li>
+                                <li>配置 <code>cron.maxConcurrentRuns</code> 控制并发数</li>
+                                <li>通过 <code>cron.store</code> 管理任务持久化</li>
+                                <li>结合 webhook 实现外部触发</li>
+                            </ul>
                         </div>
 
-                        <!-- 步骤6: 配对与测试 -->
-                        <div class="practice-step" id="step-6">
-                            <h3><i class="fas fa-check-double"></i> 步骤 6: 配对与测试</h3>
-                            <div class="step-content">
-                                <div class="pairing-flow">
-                                    <h4>配对流程</h4>
-                                    <div class="flow-diagram">
-                                        <div class="flow-step">
-                                            <i class="fas fa-paper-plane"></i>
-                                            <span>发送消息给 Bot</span>
-                                        </div>
-                                        <div class="flow-arrow"><i class="fas fa-arrow-right"></i></div>
-                                        <div class="flow-step">
-                                            <i class="fas fa-reply"></i>
-                                            <span>收到配对码</span>
-                                        </div>
-                                        <div class="flow-arrow"><i class="fas fa-arrow-right"></i></div>
-                                        <div class="flow-step">
-                                            <i class="fas fa-check"></i>
-                                            <span>批准配对</span>
-                                        </div>
-                                        <div class="flow-arrow"><i class="fas fa-arrow-right"></i></div>
-                                        <div class="flow-step">
-                                            <i class="fas fa-robot"></i>
-                                            <span>开始对话</span>
-                                        </div>
-                                    </div>
-                                </div>
-                                
-                                <div class="action-box">
-                                    <h4>1. 在 Telegram 中发送消息</h4>
-                                    <p>在 Telegram 中找到你的 Bot，发送任意消息（如 "hello"）</p>
-                                </div>
+                        <div class="optimization-card">
+                            <div class="opt-icon"><i class="fas fa-plug"></i></div>
+                            <h3>Plugins 插件扩展</h3>
+                            <ul>
+                                <li>使用 <code>plugins.enabled</code> 全局启用/禁用插件</li>
+                                <li>通过 <code>plugins.allow</code> 和 <code>plugins.deny</code> 控制插件白名单</li>
+                                <li>配置 <code>plugins.slots.memory</code> 选择记忆插件后端</li>
+                                <li>安装外部插件扩展功能</li>
+                            </ul>
+                        </div>
 
-                                <div class="action-box">
-                                    <h4>2. 查看待处理的配对请求</h4>
-                                    <div class="code-block">
-                                        <pre><code># 查看 Telegram 的待处理配对请求
-openclaw pairing list --channel telegram</code></pre>
-                                        <button class="copy-btn" onclick="copyCode(this)">
-                                            <i class="fas fa-copy"></i>
-                                        </button>
-                                    </div>
-                                    <div class="output-example">
-                                        <p>预期输出：</p>
-                                        <pre>Pending Pairings for telegram:
-CODE         USER ID      NAME          DATE
-claw-xyz     123456789    John Doe      2024-01-15...</pre>
-                                    </div>
-                                </div>
+                        <div class="optimization-card">
+                            <div class="opt-icon"><i class="fas fa-tools"></i></div>
+                            <h3>Tools 工具权限</h3>
+                            <ul>
+                                <li>使用 <code>tools.profile</code> 选择工具配置集（minimal/coding/messaging/full）</li>
+                                <li>通过 <code>tools.allow</code> 和 <code>tools.deny</code> 细粒度控制工具</li>
+                                <li>配置 <code>tools.exec</code> 控制shell命令执行（host/security/ask）</li>
+                                <li>使用 <code>tools.web.search</code> 启用网页搜索</li>
+                            </ul>
+                        </div>
 
-                                <div class="action-box">
-                                    <h4>3. 批准配对</h4>
-                                    <div class="code-block">
-                                        <pre><code># 使用上一步看到的 CODE 批准配对
-openclaw pairing approve telegram claw-xyz</code></pre>
-                                        <button class="copy-btn" onclick="copyCode(this)">
-                                            <i class="fas fa-copy"></i>
-                                        </button>
-                                    </div>
-                                </div>
+                        <div class="optimization-card">
+                            <div class="opt-icon"><i class="fas fa-database"></i></div>
+                            <h3>Memory Search 记忆搜索</h3>
+                            <ul>
+                                <li>启用 <code>memorySearch.enabled</code> 开启向量记忆搜索</li>
+                                <li>配置 <code>memorySearch.sources</code> 选择索引源（memory/sessions）</li>
+                                <li>使用 <code>memorySearch.sync</code> 控制自动同步策略</li>
+                                <li>配置 <code>memorySearch.query</code> 优化搜索结果</li>
+                            </ul>
+                        </div>
 
-                                <div class="action-box">
-                                    <h4>4. 验证连接状态</h4>
-                                    <div class="code-block">
-                                        <pre><code># 检查频道状态
-openclaw channels status --probe</code></pre>
-                                        <button class="copy-btn" onclick="copyCode(this)">
-                                            <i class="fas fa-copy"></i>
-                                        </button>
-                                    </div>
-                                </div>
+                        <div class="optimization-card">
+                            <div class="opt-icon"><i class="fas fa-comments"></i></div>
+                            <h3>Context 上下文管理</h3>
+                            <ul>
+                                <li>使用 <code>contextTokens</code> 限制上下文token上限</li>
+                                <li>配置 <code>contextPruning</code> 控制上下文修剪策略</li>
+                                <li>使用 <code>compaction</code> 管理长会话压缩</li>
+                                <li>配置 <code>contextPruning.softTrim</code> 保留关键内容</li>
+                            </ul>
+                        </div>
 
-                                <div class="success-box">
-                                    <i class="fas fa-trophy"></i>
-                                    <div>
-                                        <h4>恭喜！配置完成</h4>
-                                        <p>现在你可以在 Telegram 中与你的 OpenCLAW Bot 对话了。尝试发送：</p>
-                                        <ul>
-                                            <li>"帮我查看当前目录"</li>
-                                            <li>"运行 ls -la 命令"</li>
-                                            <li>"总结这个文件的内容"（发送文件后）</li>
-                                        </ul>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="step-actions">
-                                <button class="btn btn-outline" onclick="prevStep(5)"><i class="fas fa-arrow-left"></i> 上一步</button>
-                                <button class="btn btn-primary" onclick="finishTutorial()">
-                                    <i class="fas fa-check"></i> 完成教程
-                                </button>
-                            </div>
+                        <div class="optimization-card">
+                            <div class="opt-icon"><i class="fas fa-users"></i></div>
+                            <h3>Subagents 子代理</h3>
+                            <ul>
+                                <li>使用 <code>subagents.maxConcurrent</code> 控制并发子代理数</li>
+                                <li>配置 <code>subagents.archiveAfterMinutes</code> 设置自动归档时间</li>
+                                <li>通过 <code>subagents.model</code> 为子代理指定专用模型</li>
+                                <li>使用 <code>subagents.thinking</code> 控制子代理思考模式</li>
+                            </ul>
+                        </div>
+
+                        <div class="optimization-card">
+                            <div class="opt-icon"><i class="fas fa-shield-alt"></i></div>
+                            <h3>Sandbox 沙箱安全</h3>
+                            <ul>
+                                <li>使用 <code>sandbox.mode</code> 选择沙箱模式（off/non-main/all）</li>
+                                <li>配置 <code>sandbox.workspaceAccess</code> 控制工作区访问权限</li>
+                                <li>通过 <code>sandbox.docker</code> 配置容器化隔离</li>
+                                <li>使用 <code>sandbox.browser</code> 控制浏览器隔离</li>
+                            </ul>
+                        </div>
+
+                        <div class="optimization-card">
+                            <div class="opt-icon"><i class="fas fa-envelope"></i></div>
+                            <h3>Messages 消息处理</h3>
+                            <ul>
+                                <li>使用 <code>messages.queue</code> 配置消息队列策略</li>
+                                <li>配置 <code>messages.tts</code> 控制语音合成</li>
+                                <li>通过 <code>messages.ackReaction</code> 设置消息确认反应</li>
+                                <li>使用 <code>messages.inbound.debounceMs</code> 处理高频消息</li>
+                            </ul>
+                        </div>
+
+                        <div class="optimization-card">
+                            <div class="opt-icon"><i class="fas fa-key"></i></div>
+                            <h3>Auth 认证管理</h3>
+                            <ul>
+                                <li>使用 <code>auth.profiles</code> 配置多个认证配置</li>
+                                <li>通过 <code>auth.order</code> 设置认证优先级</li>
+                                <li>配置 <code>auth.cooldowns</code> 控制失败后冷却时间</li>
+                                <li>使用账单限流避免意外超额</li>
+                            </ul>
+                        </div>
+
+                        <div class="optimization-card">
+                            <div class="opt-icon"><i class="fab fa-telegram"></i></div>
+                            <h3>Telegram 配置</h3>
+                            <ul>
+                                <li>使用 <code>channels.telegram.dmPolicy</code> 控制DM权限</li>
+                                <li>配置 <code>channels.telegram.streamMode</code> 选择流式响应模式</li>
+                                <li>通过 <code>channels.telegram.groups</code> 配置群组设置</li>
+                                <li>使用 <code>channels.telegram.retry</code> 配置重试策略</li>
+                            </ul>
+                        </div>
+
+                        <div class="optimization-card">
+                            <div class="opt-icon"><i class="fab fa-discord"></i></div>
+                            <h3>Discord 配置</h3>
+                            <ul>
+                                <li>使用 <code>channels.discord.dm.policy</code> 控制DM权限</li>
+                                <li>配置 <code>channels.discord.intents</code> 启用特权intent</li>
+                                <li>通过 <code>channels.discord.pluralkit</code> 集成 PluralKit</li>
+                                <li>使用 <code>channels.discord.maxLinesPerMessage</code> 控制消息长度</li>
+                            </ul>
+                        </div>
+
+                        <div class="optimization-card">
+                            <div class="opt-icon"><i class="fas fa-clock"></i></div>
+                            <h3>Timeout 超时控制</h3>
+                            <ul>
+                                <li>使用 <code>timeoutSeconds</code> 设置请求超时</li>
+                                <li>配置 <code>typingIntervalSeconds</code> 控制打字间隔</li>
+                                <li>通过 <code>humanDelay</code> 模拟人类输入延迟</li>
+                                <li>使用 <code>mediaMaxMb</code> 限制媒体文件大小</li>
+                            </ul>
                         </div>
                     </div>
                 </div>
@@ -875,17 +825,15 @@ openclaw channels status --probe</code></pre>
 
         <!-- 底部 -->
         <footer class="footer">
-            <p>OpenCLAW 智能助手 | 让 AI 助手触手可及</p>
+            <p>OpenClaw 智能助手 | 让 AI 助手触手可及</p>
         </footer>
     </div>
 
-    <div class="footer">
+    <footer class="footer">
         <p>源码地址：<a href="https://github.com/kunyashaw/openclaw-newbie-faq.git" target="_blank">https://github.com/kunyashaw/openclaw-newbie-faq.git</a></p>
-    </div>
+    </footer>
 
     <script src="app.js"></script>
 
-    
-    </div>
 </body>
 </html>
