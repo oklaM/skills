@@ -5,6 +5,36 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), version
 
 ---
 
+## v1.0.4 (2026-03-03) — Knowledge Base Integration
+
+### 🎓 Improved Agent Decision-Making
+
+**Added mandatory knowledge base consultation to improve multi-media workflow planning, visual consistency, and mode selection.**
+
+#### Added
+- **YAML Description Warning**: Added prominent warning to read `ima-knowledge-ai` skill first
+  - Especially `workflow-design.md` for multi-step/multi-media workflows
+  - And `visual-consistency.md` for series/character generation
+- **MANDATORY PRE-CHECK Section**: New section before main content with:
+  - Workflow complexity check (multi-media coordination)
+  - Visual consistency check triggers (keywords: "系列", "多张", "同一个", "角色", etc.)
+  - Video mode understanding (image_to_video vs reference_image_to_video)
+  - Model selection guidance
+  - Why this matters explanation
+  - Example multi-media workflow case (product MV with 旺财)
+  - Pseudo-code for proper multi-media workflow sequencing
+
+#### Changed
+- Version bumped from v1.0.3 to v1.0.4
+
+#### Why This Change?
+
+Knowledge skills have unclear trigger logic compared to functional skills. By embedding knowledge references directly in atomic skills, agents are more likely to consult the knowledge base before execution. `ima-all-ai` is the comprehensive skill covering all media types — multi-media workflows need proper task sequencing, visual consistency management, and correct video mode selection.
+
+**Test feedback**: Modification improves agent knowledge usage. ⭐⭐⭐⭐⭐
+
+---
+
 ## v1.0.3 (2026-02-28) — Security Transparency Update
 
 ### 🔒 Security Documentation Improvements

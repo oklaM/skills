@@ -1,34 +1,98 @@
 ---
 name: IMA Studio
-version: 1.0.3
+version: 1.0.4
 category: file-generation
 author: IMA Studio (imastudio.com)
 keywords: imastudio, ai creation, multimodal
 argument-hint: "[text prompt, image URL, or music description]"
 description: >
-  Use for any IMA AI content generation: images, videos, and music via IMA Open API.
-  IMPORTANT — Default model selection rule: always recommend the NEWEST and most POPULAR model,
-  NOT the cheapest. Defaults: image → SeeDream 4.5 (doubao-seedream-4.5, 5pts);
-  image budget → Nano Banana2 (gemini-3.1-flash-image, 4pts for 512px);
-  video text_to_video → Wan 2.6 (wan2.6-t2v, 25pts) — most popular, balanced cost;
-  video image_to_video → Wan 2.6 (wan2.6-i2v, 25pts);
-  music → Suno sonic (25pts).
-  Production models (2026-02-27) — Image text_to_image (3): SeeDream 4.5, Nano Banana2, Nano Banana Pro.
-  Image image_to_image (3): SeeDream 4.5, Nano Banana2, Nano Banana Pro.
-  Video text_to_video (14): Wan 2.6, Hailuo 2.0/2.3, Vidu Q2, SeeDance 1.5 Pro, Sora 2 Pro,
-  Kling O1/2.6, Google Veo 3.1, Pixverse V3.5-V5.5.
-  Video image_to_video (14): Wan 2.6, Hailuo 2.0/2.3, Vidu Q2 Pro, SeeDance 1.5 Pro, Sora 2 Pro,
-  Kling O1/2.6, Google Veo 3.1, Pixverse V3.5-V5.5.
-  Video first_last_frame_to_video (10): Hailuo 2.0, Vidu Q2 Pro, Kling O1/2.6,
-  Google Veo 3.1, Pixverse V3.5-V5.5.
-  Video reference_image_to_video (9): Vidu Q2, Kling O1, Google Veo 3.1, Pixverse (all versions).
-  Music text_to_music (3): Suno sonic/sonic-v5, DouBao BGM, DouBao Song.
-  Use this all-in-one skill when a task spans multiple media types; use the focused
-  ima-image-ai / ima-video-ai / ima-voice-ai skills for single-media workflows.
+  ⚠️ BEFORE using this skill: READ ima-knowledge-ai skill FIRST! Especially workflow-design.md 
+  for multi-step/multi-media workflows, and visual-consistency.md for series/character generation. 
+  Use for any IMA AI content generation: images, videos, and music via IMA Open API. IMPORTANT — 
+  Default model selection rule: always recommend the NEWEST and most POPULAR model, NOT the cheapest. 
+  Defaults: image → SeeDream 4.5 (doubao-seedream-4.5, 5pts); image budget → Nano Banana2 
+  (gemini-3.1-flash-image, 4pts for 512px); video text_to_video → Wan 2.6 (wan2.6-t2v, 25pts) — 
+  most popular, balanced cost; video image_to_video → Wan 2.6 (wan2.6-i2v, 25pts); 
+  music → Suno sonic (25pts). Production models (2026-02-27) — Image text_to_image (3): 
+  SeeDream 4.5, Nano Banana2, Nano Banana Pro. Image image_to_image (3): SeeDream 4.5, Nano Banana2, 
+  Nano Banana Pro. Video text_to_video (14): Wan 2.6, Hailuo 2.0/2.3, Vidu Q2, SeeDance 1.5 Pro, 
+  Sora 2 Pro, Kling O1/2.6, Google Veo 3.1, Pixverse V3.5-V5.5. Video image_to_video (14): 
+  Wan 2.6, Hailuo 2.0/2.3, Vidu Q2 Pro, SeeDance 1.5 Pro, Sora 2 Pro, Kling O1/2.6, Google Veo 3.1, 
+  Pixverse V3.5-V5.5. Video first_last_frame_to_video (10): Hailuo 2.0, Vidu Q2 Pro, Kling O1/2.6, 
+  Google Veo 3.1, Pixverse V3.5-V5.5. Video reference_image_to_video (9): Vidu Q2, Kling O1, 
+  Google Veo 3.1, Pixverse (all versions). Music text_to_music (3): Suno sonic/sonic-v5, 
+  DouBao BGM, DouBao Song. Use this all-in-one skill when a task spans multiple media types; 
+  use the focused ima-image-ai / ima-video-ai / ima-voice-ai skills for single-media workflows. 
   Requires an ima_* API key.
 ---
 
 # IMA AI Creation
+
+## ⚠️ MANDATORY PRE-CHECK: Read Knowledge Base First!
+
+**BEFORE executing ANY multi-media generation task, you MUST:**
+
+1. **Check for workflow complexity** — Read `ima-knowledge-ai/workflow-design.md` if:
+   - User mentions: "MV"、"宣传片"、"完整作品"、"配乐"、"soundtrack"
+   - Task spans multiple media types (image + video, video + music, etc.)
+   - Complex multi-step workflows that need task decomposition
+
+2. **Check for visual consistency needs** — Read `ima-knowledge-ai/visual-consistency.md` if:
+   - User mentions: "系列"、"多张"、"同一个"、"角色"、"续"、"series"、"same"
+   - Task involves: multiple images/videos, character continuity, product shots
+   - Second+ request about same subject (e.g., "旺财在游泳" after "生成旺财照片")
+
+3. **Check video modes** — Read `ima-knowledge-ai/video-modes.md` if:
+   - Any video generation task
+   - Need to understand: image_to_video vs reference_image_to_video difference
+
+4. **Check model selection** — Read `ima-knowledge-ai/model-selection.md` if:
+   - Unsure which model to use
+   - Need cost/quality trade-off guidance
+   - User specifies budget or quality requirements
+
+**Why this matters:**
+- Multi-media workflows need proper task sequencing (e.g., video duration → matching music duration)
+- AI generation defaults to **独立生成** each time — without reference images, results will be inconsistent
+- Wrong video mode = wrong result (image_to_video ≠ reference_image_to_video)
+- Model choice affects cost and quality significantly
+
+**Example multi-media workflow:**
+```
+User: "帮我做个产品宣传MV，有背景音乐，主角是旺财小狗"
+
+❌ Wrong: 
+  1. Generate dog image (random look)
+  2. Generate video (different dog)
+  3. Generate music (unrelated)
+
+✅ Right:
+  1. Read workflow-design.md + visual-consistency.md
+  2. Generate Master Reference: 旺财小狗图片
+  3. Generate video shots using image_to_video with 旺财 as first frame
+  4. Get video duration (e.g., 15s)
+  5. Generate BGM with matching duration and mood
+```
+
+**How to check:**
+```python
+# Step 1: Read knowledge base based on task type
+if multi_media_workflow:
+    read("~/.openclaw/skills/ima-knowledge-ai/references/workflow-design.md")
+
+if "same subject" or "series" or "character":
+    read("~/.openclaw/skills/ima-knowledge-ai/references/visual-consistency.md")
+
+if video_generation:
+    read("~/.openclaw/skills/ima-knowledge-ai/references/video-modes.md")
+
+# Step 2: Execute with proper sequencing and reference images
+# (see workflow-design.md for specific patterns)
+```
+
+**No exceptions** — for simple single-media requests, you can proceed directly. For complex multi-media workflows, read the knowledge base first.
+
+---
 
 ## ⚙️ How This Skill Works
 
