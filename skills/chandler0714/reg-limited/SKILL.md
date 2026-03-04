@@ -1,113 +1,129 @@
 ---
 name: reg-limited
-description: 车辆限号查询与提醒工具。输入车牌号、所属城市和提醒时间，当限号时在设定时间推送通知。支持中国主要城市限号查询。
+description: Vehicle restriction query and reminder tool for Chinese cities. Query daily restrictions and set scheduled reminders.
 ---
 
-# RegLimited - 车辆限号查询与提醒
+# RegLimited - Vehicle Restriction Query & Reminder
 
-一个帮助你查询车辆限号并设置提醒的工具。
+A tool to help you query vehicle restrictions and set reminders for Chinese cities.
 
-## 功能
+## Features
 
-1. **限号查询** - 根据城市和车牌号查询今日是否限行
-2. **定时提醒** - 在设定的时间推送限号通知
-3. **多城市支持** - 支持北京、上海、广州、深圳、杭州、成都等城市
+1. **Restriction Query** - Check if your vehicle is restricted today based on city and plate
+2. **Scheduled Reminders** - Get notified at specified times about restriction info
+3. **Multi-city Support** - Supports major Chinese cities including Beijing, Shanghai, Guangzhou, Shenzhen, Hangzhou, Chengdu, etc.
 
-## 使用方式
+## Usage
 
-### 1. 设置限号提醒
-
-```bash
-# 基本用法
-reg-limited add --city 北京 --plate 京A12345 --time "07:00"
-
-# 完整参数
-reg-limited add --city 北京 --plate 京A12345 --time "07:00" --notify-channel feishu
-```
-
-### 2. 查询今日限号
+### 1. Query Today's Restrictions
 
 ```bash
-# 查询某城市今日限行尾号
-reg-limited query --city 北京
+# Query today's restricted digits for a city
+reg-limited query --city beijing
 
-# 查询车牌是否限行
-reg-limited check --city 北京 --plate 京A12345
+# Check if a plate is restricted
+reg-limited check --city beijing --plate 京A12345
 ```
 
-### 3. 列出所有提醒
+### 2. Set Restriction Reminders
+
+```bash
+# Basic usage
+reg-limited add --city beijing --plate 京A12345 --time "07:00"
+
+# Full parameters
+reg-limited add --city beijing --plate 京A12345 --time "07:00" --notify-channel feishu
+```
+
+### 3. List All Reminders
 
 ```bash
 reg-limited list
 ```
 
-### 4. 删除提醒
+### 4. Remove Reminders
 
 ```bash
-reg-limited remove --id <提醒ID>
+reg-limited remove --id <reminder_id>
 ```
 
-## 支持的城市
+## Supported Cities
 
-- 北京 (beijing)
-- 上海 (shanghai)
-- 广州 (guangzhou)
-- 深圳 (shenzhen)
-- 杭州 (hangzhou)
-- 成都 (chengdu)
-- 天津 (tianjin)
-- 武汉 (wuhan)
-- 西安 (xian)
-- 南京 (nanjing)
+- Beijing (北京)
+- Shanghai (上海)
+- Guangzhou (广州)
+- Shenzhen (深圳)
+- Hangzhou (杭州)
+- Chengdu (成都)
+- Tianjin (天津)
+- Wuhan (武汉)
+- Xi'an (西安)
+- Nanjing (南京)
 
-## 限号规则说明
+## Restriction Rules
 
-各城市限号规则：
-- **北京**: 按尾号限行，周一到周五
-- **上海**: 高架限行
-- **广州**: 开四停四
-- **深圳**: 早晚高峰限行
+### Beijing
+Queries real-time restriction data from Beijing Traffic Management Bureau:
+- Official source: https://jtgl.beijing.gov.cn/jgj/lszt/659722/660341/index.html
+- Current period: 2025-12-29 to 2026-03-29
+- Restrictions apply Mon-Fri, 7:00-20:00
 
-具体规则可通过 `reg-limited query --city <城市>` 查询当日具体限行尾号。
+| Day | Restricted |
+|-----|------------|
+| Monday | 3, 8 |
+| Tuesday | 4, 9 |
+| Wednesday | 5, 0 |
+| Thursday | 1, 6 |
+| Friday | 2, 7 |
 
-## 输出格式
+### Other Cities
+- **Shanghai**: Elevated road restrictions
+- **Guangzhou**: "Open Four, Stop Four" policy
+- **Shenzhen**: Morning/evening peak hour restrictions
+- **Hangzhou/Chengdu/Tianjin/Wuhan/Xi'an/Nanjing**: Day-specific number restrictions
 
-JSON 格式输出，便于程序处理：
+## Output Format
+
+JSON format for program processing:
 ```json
 {
   "success": true,
   "data": {
     "city": "北京",
-    "date": "2026-02-25",
-    "restricted": ["2", "7"],
-    "isRestricted": false,
+    "date": "2026-03-03",
+    "restricted": ["4", "9"],
+    "isRestricted": true,
     "plate": "京A12345",
-    "lastDigit": "5"
+    "lastDigit": "4"
   }
 }
 ```
 
-## 技术实现
+## Example Dialogues
 
-1. 通过百度搜索获取当日限行信息
-2. 解析限行尾号
-3. 比对车牌尾号
-4. 通过定时任务推送通知
+> User: What's today's vehicle restriction in Beijing?  
+> Bot: Today's restriction digits: 4, 9 (Your plate 4 is restricted!)
 
-## 依赖
+> User: Is my car 京A12345 restricted today?  
+> Bot: Yes! Today (Tuesday) Beijing restricts digits 4 and 9. Your plate ends with 4, so it's restricted.
+
+> User: Set a reminder for 7am tomorrow about restrictions  
+> Bot: Done! You'll receive a restriction reminder at 7am tomorrow.
+
+## Technical Implementation
+
+1. Fetches daily restriction info from official government sources
+2. For Beijing: queries https://jtgl.beijing.gov.cn/jgj/lszt/659722/660341/index.html
+3. Parses restricted digits from the official table
+4. Compares with plate last digit
+5. Sends notifications via scheduled tasks
+
+## Dependencies
 
 - Node.js
-- 网络访问 (用于查询限行信息)
-- 消息推送通道 (飞书/Telegram等)
-
-## 示例对话
-
-> 用户：北京今日限号多少？  
-> 机器人：查询中... 北京今日限号：2、7
-
-> 用户：帮我设置明天早上7点提醒我限号情况，车牌是京A12345  
-> 机器人：已设置！明天7点会推送限号提醒
+- Network access (for querying restrictions)
+- Message channels (Feishu/Telegram/etc.)
 
 ---
 
-*更多城市持续添加中...*
+*More cities coming soon...*
