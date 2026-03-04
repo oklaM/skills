@@ -1,0 +1,11 @@
+{
+  "owner": "brugillo",
+  "slug": "aice",
+  "displayName": "AICE — AI Confidence Engine",
+  "latest": {
+    "version": "1.2.1",
+    "publishedAt": 1772563486935,
+    "commit": null
+  },
+  "history": []
+}
