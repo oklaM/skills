@@ -1,0 +1,11 @@
+{
+  "owner": "matthewxmurphy",
+  "slug": "wordpress-rest-api",
+  "displayName": "WordPress REST API",
+  "latest": {
+    "version": "0.6.0",
+    "publishedAt": 1772640132516,
+    "commit": null
+  },
+  "history": []
+}
