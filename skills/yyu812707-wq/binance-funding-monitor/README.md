@@ -2,10 +2,26 @@
 
 通过 SkillPay 按次付费使用币安账户监控服务。
 
-## 定价
+## 价格
 
-- **每次调用**: 0.001 USDT
-- **支付方式**: Crypto 钱包 (Web3)
+- 每次调用: **1 USDT**
+- 支付方式: Crypto 钱包 (Web3)
+
+## 前置要求
+
+使用本工具前，需要配置以下环境变量：
+
+### 必需（用户自己的币安 API）
+```bash
+export BINANCE_API_KEY="your_binance_api_key"
+export BINANCE_API_SECRET="your_binance_api_secret"
+```
+
+### 可选（SkillPay 配置，通常由平台自动注入）
+```bash
+export SKILLPAY_API_KEY="your_skillpay_api_key"
+export SKILLPAY_ENDPOINT="https://api.skillpay.me/v1"
+```
 
 ## 功能
 
@@ -16,7 +32,10 @@
 
 ## 使用方法
 
-需要配置币安 API Key 后使用。
+1. 配置币安 API Key
+2. 安装 Skill: `clawhub install binance-funding-monitor`
+3. 调用功能，按提示支付 1 USDT
+4. 获取监控数据
 
 ## 免责声明
 

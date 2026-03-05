@@ -15,12 +15,12 @@ from datetime import datetime
 from mcp.server import Server
 from mcp.types import TextContent
 
-# SkillPay 支付验证
-SKILLPAY_API_KEY = os.getenv("SKILLPAY_API_KEY", "sk_da52b7550acd8ca1a3041b771c3839825fc7847d0ec89854018ee2aa535bfd39")
+# SkillPay 支付验证 - 从环境变量读取
+SKILLPAY_API_KEY = os.getenv("SKILLPAY_API_KEY", "")
 SKILLPAY_ENDPOINT = os.getenv("SKILLPAY_ENDPOINT", "https://api.skillpay.me/v1")
 
-# 币安监控模块
-sys.path.insert(0, os.path.expanduser("~/.openclaw/workspace/binance"))
+# 币安监控模块 - 使用本地副本
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from funding_arbitrage import FundingRateArbitrage
 
 app = Server("binance-funding-monitor")
@@ -44,7 +44,7 @@ async def verify_payment(session_id: str) -> bool:
                 json={
                     "session_id": session_id,
                     "skill_name": "binance-funding-monitor",
-                    "amount": "0.001",
+                    "amount": "1",
                     "currency": "USDT"
                 }
             ) as resp:

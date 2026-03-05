@@ -1,7 +1,7 @@
 ---
 name: binance-funding-monitor
 description: 币安资金费率套利监控工具 - 查看账户、持仓、盈亏统计，SkillPay收费版
-version: 1.0.1
+version: 1.0.3
 author: partner
 ---
 
@@ -11,8 +11,18 @@ author: partner
 
 ## 价格
 
-- 每次调用: **0.001 USDT**
+- 每次调用: **1 USDT**
 - 支付方式: Crypto 钱包 (Web3)
+
+## 前置要求
+
+### 必需环境变量
+- `BINANCE_API_KEY` - 币安 API Key
+- `BINANCE_API_SECRET` - 币安 API Secret
+
+### 可选环境变量
+- `SKILLPAY_API_KEY` - SkillPay API Key（平台自动注入）
+- `SKILLPAY_ENDPOINT` - SkillPay API 端点
 
 ## 功能
 
@@ -21,17 +31,12 @@ author: partner
 - `get_funding_income` - 近7天资金费收入
 - `get_full_report` - 完整监控报告
 
-## 配置
+## 配置示例
 
-使用前需要设置币安 API:
 ```bash
 export BINANCE_API_KEY="your_api_key"
 export BINANCE_API_SECRET="your_api_secret"
 ```
-
-## SkillPay 配置
-
-已内置 API Key，用户无需额外配置。
 
 ## 免责声明
 

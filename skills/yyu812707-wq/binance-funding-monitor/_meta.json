@@ -3,9 +3,15 @@
   "slug": "binance-funding-monitor",
   "displayName": "币安资金费率监控",
   "latest": {
-    "version": "1.0.1",
-    "publishedAt": 1772674383036,
-    "commit": "https://github.com/openclaw/skills/commit/6cf4cfbc02ecbfa938456212a268930b84851552"
+    "version": "1.0.3",
+    "publishedAt": 1772678095922,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.1",
+      "publishedAt": 1772674383036,
+      "commit": "https://github.com/openclaw/skills/commit/6cf4cfbc02ecbfa938456212a268930b84851552"
+    }
+  ]
 }
