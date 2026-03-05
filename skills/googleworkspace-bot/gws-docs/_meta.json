@@ -1,0 +1,11 @@
+{
+  "owner": "googleworkspace-bot",
+  "slug": "gws-docs",
+  "displayName": "Gws Docs",
+  "latest": {
+    "version": "1.0.0",
+    "publishedAt": 1772665493152,
+    "commit": null
+  },
+  "history": []
+}
