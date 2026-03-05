@@ -107,12 +107,16 @@ async function setup() {
   console.log(`   3. 启动 Runner: node runner.mjs`);
 
   // 4. BNB balance
-  try {
-    const provider = new ethers.JsonRpcProvider("https://bsc-dataseed1.binance.org");
-    const bal = await provider.getBalance(walletData.address);
-    const bnb = ethers.formatEther(bal);
-    console.log(parseFloat(bnb) >= 0.005 ? `\n✅ Gas 余额: ${bnb} BNB` : `\n⚠️  Gas 余额: ${bnb} BNB (需要 ≥ 0.005 BNB)`);
-  } catch {}
+  const rpcs = ["https://bsc-rpc.publicnode.com","https://bsc-dataseed1.binance.org","https://bsc-dataseed2.binance.org"];
+  for (const rpc of rpcs) {
+    try {
+      const provider = new ethers.JsonRpcProvider(rpc);
+      const bal = await provider.getBalance(walletData.address);
+      const bnb = ethers.formatEther(bal);
+      console.log(parseFloat(bnb) >= 0.005 ? `\n✅ Gas 余额: ${bnb} BNB` : `\n⚠️  Gas 余额: ${bnb} BNB (需要 ≥ 0.005 BNB)`);
+      break;
+    } catch {}
+  }
 }
 
 function addToken(tokenId) {
@@ -189,10 +193,18 @@ async function showStatus() {
 
   if (walletData) {
     try {
-      const provider = new ethers.JsonRpcProvider("https://bsc-dataseed1.binance.org");
-      const bal = await provider.getBalance(walletData.address);
-      status.bnbBalance = ethers.formatEther(bal);
-      status.hasGas = parseFloat(status.bnbBalance) >= 0.005;
+      const rpcs3 = ["https://bsc-rpc.publicnode.com","https://bsc-dataseed1.binance.org","https://bsc-dataseed2.binance.org"];
+      let fetched = false;
+      for (const rpc of rpcs3) {
+        try {
+          const provider = new ethers.JsonRpcProvider(rpc);
+          const bal = await provider.getBalance(walletData.address);
+          status.bnbBalance = ethers.formatEther(bal);
+          status.hasGas = parseFloat(status.bnbBalance) >= 0.005;
+          fetched = true; break;
+        } catch {}
+      }
+      if (!fetched) { status.bnbBalance = "check_failed"; status.hasGas = false; }
     } catch {
       status.bnbBalance = "check_failed";
       status.hasGas = false;

@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * CodeDNA Chain Interaction Script (V3)
+ * CodeDNA Chain Interaction Script (V4)
  * 
  * Usage:
  *   node chain.mjs <command> [args...]
@@ -37,19 +37,19 @@ import { readFileSync, existsSync } from "fs";
 import { join } from "path";
 import { homedir } from "os";
 
-// ========== V3 Contract Addresses (BSC Mainnet) ==========
+// ========== V4 Contract Addresses (BSC Mainnet) ==========
 const CONTRACTS = {
-  dnagold:    "0x660AA4225956975171deE3D78612c7B58c5e96B6",
-  core:       "0x4033AFaFAb90191a4982CdAfa5Cb4E117A91f185",
-  worldMap:   "0x9C3eD84D6BFDDD425b46a94052f725B23593c297",
-  family:     "0x7D71118205FECBF4B62c2a5157c170588c6e9DD7",
-  economy:    "0x615DBE2117c8D68514bA14aC8f9E026045977F7a",
-  behavior:   "0x293fbFC88E6d6E01b9428806D7F1F93C23EA4D77",
-  death:      "0x03b15E325EDF110897bf527E2dA08b1D6f60b32c",
-  reproduce:  "0x7873ECE552C11C31Fb37822c8B5c699b4Fd51c04",
-  sale:       "0xcBe90d6F542FCaafCdaCd569EeA66B87af56d7de",
-  market:     "0x90A7f9025D9a57508Aba43126f58DaB032C37371",
-  bridge:     "0x319881A6F66a832f4f09Ad94128Fb01b1bEB23CE",
+  dnagold:    "0xE43c4e25666F2e181ecd7b4A96930b8F1EB6b855",
+  core:       "0xa5F70e840214C1EF2Da43253A83e1538A1D0A708",
+  worldMap:   "0x23cE665fC94F6c91A9fc9F6274BBe3970bfcE07d",
+  family:     "0xaD38143c10429A34E0122e8840aB4D2f41133C21",
+  economy:    "0x1238Cca41859Dd918A16F63e64500Dc7c5c5075C",
+  behavior:   "0x0201fEBdF968C1e39851bb70BFC8326ffb039A37",
+  death:      "0xC192775a270a9Ad20397df5BCB85bd49982219a9",
+  reproduce:  "0x1714e200b9C9A73Cc84601631dba8Ff036CA5786",
+  sale:       "0x391451947F3013985589e0443c89f74de39829D6",
+  market:     "0xc56122026B56BCC937EaEeF09807C99B8359b51C",
+  bridge:     "0x5798A6bf1B290fe40EaF4D2d6f1DadF58def631a",
 };
 
 const ATTR_LABELS = ["IQ","领导力","力量","攻击","外交","创造力","寿命","繁殖力"];
@@ -144,10 +144,28 @@ function loadPrivateKey() {
   return "";
 }
 
-const rpc = process.env.CODEDNA_RPC_URL || "https://bsc-dataseed1.binance.org";
 const pk = loadPrivateKey();
 
-const provider = new ethers.JsonRpcProvider(rpc);
+// Multi-RPC fallback provider
+async function createProvider() {
+  const rpcs = process.env.CODEDNA_RPC_URL ? [process.env.CODEDNA_RPC_URL] : [
+    "https://bsc-rpc.publicnode.com",
+    "https://bsc-dataseed1.binance.org",
+    "https://bsc-dataseed2.binance.org",
+    "https://binance.llamarpc.com",
+  ];
+  for (const rpc of rpcs) {
+    try {
+      const p = new ethers.JsonRpcProvider(rpc);
+      await p.getBlockNumber();
+      return p;
+    } catch {}
+  }
+  // fallback to first anyway
+  return new ethers.JsonRpcProvider(rpcs[0]);
+}
+
+const provider = await createProvider();
 const wallet = pk ? new ethers.Wallet(pk, provider) : null;
 
 const bridge = new ethers.Contract(CONTRACTS.bridge, BRIDGE_ABI, provider);
@@ -257,6 +275,40 @@ export async function getAdjacentPlots(x, y) {
 export async function canExecute(agentId, action, targetId = 0) {
   const [ok, reason] = await bridge.canExecute(agentId, action, targetId);
   return { ok, reason };
+}
+
+/**
+ * Scan plots within radius using local keccak256 (zero RPC calls).
+ * Returns sorted array of high-value plots [{x, y, plotType, multiplier, distance}]
+ * Matches Solidity: keccak256(abi.encodePacked(uint256(plotId))) % 10
+ */
+export function scanBestPlots(cx, cy, radius = 15) {
+  const results = [];
+  const r = Math.min(radius, 15); // cap at 15
+  for (let dx = -r; dx <= r; dx++) {
+    for (let dy = -r; dy <= r; dy++) {
+      const nx = cx + dx, ny = cy + dy;
+      if (nx < 0 || nx > 999 || ny < 0 || ny > 999) continue;
+      const dist = Math.abs(dx) + Math.abs(dy); // manhattan
+      if (dist === 0 || dist > r) continue;
+      const plotId = nx * 1000 + ny;
+      // keccak256(abi.encodePacked(uint256)) — same as abi.encode for single uint256
+      const encoded = ethers.AbiCoder.defaultAbiCoder().encode(["uint256"], [plotId]);
+      const hash = BigInt(ethers.keccak256(encoded));
+      const mod = Number(hash % 10n);
+      let plotType, multiplier;
+      if (mod < 5)      { plotType = 0; multiplier = 1000; } // grassland x1.0
+      else if (mod < 7) { plotType = 1; multiplier = 1500; } // forest x1.5
+      else if (mod < 9) { plotType = 2; multiplier = 600; }  // mountain x0.6
+      else              { plotType = 3; multiplier = 3000; }  // mine x3.0
+      if (multiplier >= 1500) { // only forest+ worth navigating to
+        results.push({ x: nx, y: ny, plotType, multiplier, distance: dist });
+      }
+    }
+  }
+  // Sort: highest multiplier first, then closest
+  results.sort((a, b) => b.multiplier - a.multiplier || a.distance - b.distance);
+  return results;
 }
 
 export async function getCurrentBlock() {

@@ -35,13 +35,14 @@ import {
   getAgentFullState,
   getAdjacentPlots,
   getNearbyAgents,
+  scanBestPlots,
   executeAction,
   getCurrentBlock,
   getBnbBalance,
   getWalletAddress,
 } from "./chain.mjs";
 import { decide } from "./brain.mjs";
-import { saveMemory } from "./memory.mjs";
+import { loadMemory, recordAction, adaptStrategy, setNavTarget, clearNavTarget } from "./memory.mjs";
 
 // ========== Config ==========
 
@@ -50,7 +51,7 @@ const CONFIG_PATH = join(CONFIG_DIR, "config.json");
 const WALLET_PATH = join(CONFIG_DIR, "wallet.json");
 const STATUS_PATH = join(CONFIG_DIR, "runner_status.json");
 
-const INTERVAL_BLOCKS = 300;   // ~15 min between full cycles
+const INTERVAL_BLOCKS = 300;   // ~2.25 min between full cycles (BSC 0.45s/block)
 const MIN_BNB = 0.005;
 const POLL_INTERVAL_MS = 10000;
 const AGENT_DELAY_MS = 3000;   // 3s pause between agents to avoid RPC spam
@@ -169,6 +170,9 @@ async function waitForBlock(target) {
   return await getCurrentBlock();
 }
 
+// ========== Adaptation Interval ==========
+const ADAPT_EVERY = 20; // Adapt strategy every 20 cycles
+
 // ========== Run One Agent Cycle ==========
 
 async function runAgentCycle(tokenId, cycleNum) {
@@ -182,26 +186,57 @@ async function runAgentCycle(tokenId, cycleNum) {
     return { action: "dead", skipped: true };
   }
 
-  const gold = parseFloat(ethers.formatEther(state.lockedBalance)).toFixed(2);
-  console.log(`  状态: E=${state.currentEnergy}/${state.maxEnergy} | 位置(${state.locationX},${state.locationY}) | 金=${gold}`);
+  const goldBefore = parseFloat(ethers.formatEther(state.lockedBalance));
+  const plotNames = ["草原","森林","山地","矿脉"];
+  console.log(`  状态: E=${state.currentEnergy}/${state.maxEnergy} | (${state.locationX},${state.locationY}) ${plotNames[state.plotType]||"?"} x${state.plotMultiplier/100} | 金=${goldBefore.toFixed(1)}`);
 
-  // 2. Nearby agents
+  // 2. Load memory (includes strategy weights, plot knowledge, nav target)
+  const memory = loadMemory(tokenId);
+  const w = memory.strategyWeights;
+  console.log(`  策略: gather×${w.gatherWeight.toFixed(1)} move×${w.moveWeight.toFixed(1)} eat@${(w.eatThreshold*100).toFixed(0)}% raid×${w.raidAggression.toFixed(1)} | 采集${memory.stats.totalGathers}次 累计${memory.stats.totalGoldEarned.toFixed(0)}G`);
+
+  // 3. Nearby agents
   const plotId = state.locationX * 1000 + state.locationY;
   let nearby = [];
   try { nearby = await getNearbyAgents(plotId, 5); } catch {}
 
-  // 2.5. Adjacent plots
+  // 4. Adjacent plots + BFS scan
   try { state.adjacentPlots = await getAdjacentPlots(state.locationX, state.locationY); } catch {
     state.adjacentPlots = [];
   }
+  state.bestPlots = scanBestPlots(state.locationX, state.locationY, 15);
 
-  // 3. Decide
-  const decision = decide(state, nearby);
+  // 5. Decide (with memory context)
+  const decision = decide(state, nearby, memory);
   console.log(`  决策: ${decision.action} | ${decision.reason}`);
 
-  // 4. Execute
+  // 6. Handle navigation persistence
+  if (decision._navTarget) {
+    setNavTarget(tokenId, decision._navTarget);
+  } else if (decision.action !== "move" && decision.action !== "idle") {
+    // Arrived or doing something else — clear nav
+    const curNav = memory.navTarget;
+    if (curNav && state.locationX === curNav.x && state.locationY === curNav.y) {
+      console.log(`  🎯 已到达导航目标 (${curNav.x},${curNav.y})`);
+      clearNavTarget(tokenId);
+    }
+  }
+
+  // 7. Execute
   if (decision.action === "idle") {
     console.log(`  跳过 (无可执行行动)`);
+    // Still record idle for adaptation analysis
+    recordAction(tokenId, {
+      block: await getCurrentBlock(),
+      action: "idle",
+      success: true,
+      energyBefore: state.currentEnergy,
+      energyAfter: state.currentEnergy,
+      goldBefore,
+      goldAfter: goldBefore,
+      plotKey: `${state.locationX},${state.locationY}`,
+      note: decision.reason,
+    });
     return { action: "idle", skipped: true };
   }
 
@@ -212,19 +247,36 @@ async function runAgentCycle(tokenId, cycleNum) {
     console.log(`  TX: https://bscscan.com/tx/${result.txHash}`);
   }
 
-  // Save memory
+  // 8. Record to memory with full context
   const newBlock = await getCurrentBlock();
   let newState;
   try { newState = await getAgentFullState(tokenId); } catch { newState = state; }
+  const goldAfter = parseFloat(ethers.formatEther(newState.lockedBalance || state.lockedBalance));
 
-  saveMemory(tokenId, {
+  recordAction(tokenId, {
     block: newBlock,
     action: decision.action,
     target: decision.target_agent || decision.target_x,
-    result: result.result,
+    success: result.success,
+    reward: goldAfter - goldBefore,
+    energyBefore: state.currentEnergy,
     energyAfter: newState.currentEnergy,
+    goldBefore,
+    goldAfter,
+    plotKey: `${state.locationX},${state.locationY}`,
+    plotType: state.plotType,
+    multiplier: state.plotMultiplier,
+    agentCount: state.plotAgentCount,
     note: decision.reason,
   });
+
+  // 9. Strategy adaptation every N cycles
+  if (memory.stats.cyclesSinceAdapt >= ADAPT_EVERY) {
+    console.log(`  🧠 策略自适应 (每${ADAPT_EVERY}周期)...`);
+    const adapted = adaptStrategy(tokenId);
+    const nw = adapted.strategyWeights;
+    console.log(`  → gather×${nw.gatherWeight.toFixed(2)} move×${nw.moveWeight.toFixed(2)} eat@${(nw.eatThreshold*100).toFixed(0)}% raid×${nw.raidAggression.toFixed(2)}`);
+  }
 
   return { action: decision.action, success: result.success };
 }
@@ -255,7 +307,7 @@ async function main() {
   console.log(`Agents: ${agentList.map(id => "#" + id).join(", ")} (共 ${agentList.length} 个)`);
   console.log(`Wallet: ${walletAddr}`);
   console.log(`BNB: ${bnb.toFixed(4)}`);
-  console.log(`Interval: ${INTERVAL_BLOCKS} blocks (~${Math.round(INTERVAL_BLOCKS * 3 / 60)} min)`);
+  console.log(`Interval: ${INTERVAL_BLOCKS} blocks (~${Math.round(INTERVAL_BLOCKS * 0.45 / 60)} min)`);
   console.log(`Mode: ${onceMode ? "单次" : "持续运行"}`);
   console.log("");
 
@@ -273,7 +325,7 @@ async function main() {
       if (lastDecisionBlock > 0 && currentBlock < lastDecisionBlock + INTERVAL_BLOCKS) {
         const targetBlock = lastDecisionBlock + INTERVAL_BLOCKS;
         const waitBlocks = targetBlock - currentBlock;
-        console.log(`\n⏳ 等待区块 ${targetBlock} (还需 ${waitBlocks} 块 ≈ ${Math.round(waitBlocks * 3 / 60)}分钟)...`);
+        console.log(`\n⏳ 等待区块 ${targetBlock} (还需 ${waitBlocks} 块 ≈ ${Math.round(waitBlocks * 0.45 / 60)}分钟)...`);
         writeStatus({ state: "waiting", agents: agentList, wallet: walletAddr, cycle: cycleCount, targetBlock });
         await waitForBlock(targetBlock);
         if (shutdownRequested) break;
