@@ -94,8 +94,58 @@ From `DATA.config.agents`:
 | `heartbeat.auto_recovery` | true | false | — | ⚠️ -10 |
 | `heartbeat.enabled` | true | false | — | ⚠️ -10 |
 | `memory.auto_compact` | true | false | — | note only |
+| `model.fallbacks` | ≥1 different model | empty or same as primary | — | ⚠️ -10 |
+| `subagents.maxConcurrent` | scaled to hardware | default (8) on powerful machine | — | note only |
 
-### 2.5 Tools Section
+**Model Fallbacks:** If `agents.defaults.model.fallbacks` is empty or only contains the same model as `primary`, flag ⚠️ — single point of failure. Recommend `fix_cases.md` Case 2.7.
+
+**Concurrency Tuning:** If machine has ≥8 CPU cores and ≥16GB RAM (from `DATA.env`) but `maxConcurrent` ≤ 4 and `subagents.maxConcurrent` ≤ 8, add a note suggesting scaling up. Recommend `fix_cases.md` Case 2.8.
+
+### 2.5 Session Configuration
+
+From `DATA.config.session` and `DATA.openclaw_json`:
+
+| Parameter | Healthy | Warning | Error | Score Impact |
+|-----------|---------|---------|-------|-------------|
+| `session` section | present | missing entirely | — | ⚠️ -10 |
+| `dmScope` | `per-channel-peer` or `per-account-channel-peer` | `main` (all DMs shared) | — | ⚠️ -10 |
+| `reset` | configured (daily or idle) | missing | — | ⚠️ -5 |
+| `maintenance.mode` | `enforce` | `warn` or missing | — | ⚠️ -5 |
+| `maintenance.maxDiskBytes` | set | unset | — | note only |
+| `parentForkMaxTokens` | set and ≤ 200000 | unset or > 200000 | — | note only |
+
+If session config is missing or minimal, recommend `fix_cases.md` Case 2.9 with full recommended config.
+
+### 2.6 Models & Rate Limit
+
+From `DATA.config.models`, `DATA.models` and `DATA.logs`:
+
+**Rate Limit:**
+
+| Parameter | Healthy | Warning | Error | Score Impact |
+|-----------|---------|---------|-------|-------------|
+| `rateLimit.interval` | ≥500 | <500 or unset | — | ⚠️ -5 |
+| `rateLimit.maxRequests` | 1–20 | >50 or unset | — | ⚠️ -5 |
+| 429 errors in recent logs | 0 | 1–5 in last hour | >5 in last hour | ⚠️ -10 / ❌ -20 |
+| `providers.*.rotateKeys` | true (if multi-key) | false with multi-key | — | note only |
+
+Cross-reference: scan `DATA.logs` and `DATA.gateway_err_log` for `429`, `rate limit`, `Too Many Requests`.
+If 429 errors detected, flag as ⚠️ or ❌ and recommend `fix_cases.md` Case 2.5.
+
+**Model Context Window:**
+
+Scan all configured models from `DATA.models` (agent/models.json) and `DATA.config.models`:
+
+| Parameter | Healthy | Warning | Error | Score Impact |
+|-----------|---------|---------|-------|-------------|
+| `contextWindow` per model | ≥100000 | 50000–99999 | <50000 | ⚠️ -10 / ❌ -20 per model |
+| `maxTokens` per model | ≥16384 | 4096–16383 | <4096 | ⚠️ -10 / ❌ -20 per model |
+
+For each model with undersized window, output: model name, current values, recommended values.
+Recommended: `contextWindow >= 100000`, `maxTokens >= 16384`. For complex skills: `contextWindow >= 500000`, `maxTokens >= 65536`.
+If any model flagged, recommend `fix_cases.md` Case 2.6.
+
+### 2.7 Tools Section
 
 From `DATA.config.tools`:
 
@@ -105,9 +155,9 @@ From `DATA.config.tools`:
 | `mcp_servers` | ≥1 | 0 | ⚠️ -5 |
 | `enabled` list | non-empty | empty | ⚠️ -5 |
 
-### 2.6 Gateway Runtime Status
+### 2.8 Gateway Runtime Status
 
-Primary source: `DATA.health`. Cross-validate with `DATA.status.overview.gateway`.
+Primary source: `DATA.health` (from `openclaw health --json`). Cross-validate with `DATA.status.overview.gateway`.
 
 | Check | Source | Pass | Error | Score Impact |
 |-------|--------|------|-------|-------------|
@@ -128,7 +178,7 @@ assessment in Stage 4 (treat as `bind=tailnet` equivalent for security posture).
 If `DATA.status.diagnosis.config_valid = false` AND `DATA.config.cli_validation.success = true`:
 flag as inconsistency ⚠️ — two validation methods disagree.
 
-### 2.7 Channels
+### 2.9 Channels
 
 Primary source: `DATA.channels`. Cross-validate with `DATA.status.channels[]`.
 
@@ -141,7 +191,7 @@ Primary source: `DATA.channels`. Cross-validate with `DATA.status.channels[]`.
 For each channel in `DATA.status.channels[]`, if `enabled=true` but `state` is not "active" or "connected",
 report channel name + state as a finding. Cross-reference against `DATA.channels` for confirmation.
 
-### 2.8 CLI Tools
+### 2.10 CLI Tools
 
 From `DATA.tools`:
 
