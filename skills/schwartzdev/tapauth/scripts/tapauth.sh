@@ -1,103 +1,68 @@
 #!/usr/bin/env bash
-# TapAuth helper — create a grant, show approval URL, poll for token.
-# Usage: ./tapauth.sh <provider> <scopes> <agent_name> [base_url]
-#
-# Example:
-#   ./tapauth.sh github "repo,read:user" "My Agent"
-#   ./tapauth.sh google "drive.readonly" "Drive Reader"
-
 set -euo pipefail
 
-PROVIDER="${1:?Usage: tapauth.sh <provider> <scopes> <agent_name> [base_url]}"
-SCOPES="${2:?Usage: tapauth.sh <provider> <scopes> <agent_name> [base_url]}"
-AGENT_NAME="${3:?Usage: tapauth.sh <provider> <scopes> <agent_name> [base_url]}"
-BASE_URL="${4:-https://tapauth.ai}"
+TAPAUTH_BASE="${TAPAUTH_BASE_URL:-https://tapauth.ai}"
+TAPAUTH_DIR="${TAPAUTH_HOME:-./.tapauth}"
+mkdir -p "$TAPAUTH_DIR" && chmod 700 "$TAPAUTH_DIR"
 
-# Convert comma-separated scopes to JSON array
-SCOPES_JSON=$(echo "$SCOPES" | tr ',' '\n' | sed 's/^/"/;s/$/"/' | tr '\n' ',' | sed 's/,$//' | sed 's/^/[/;s/$/]/')
+provider="${1:-}"
+scopes="${2:-}"
 
-echo "🔐 Creating TapAuth grant..."
-echo "   Provider: $PROVIDER"
-echo "   Scopes:   $SCOPES"
-echo "   Agent:    $AGENT_NAME"
-echo ""
-
-# Step 1: Create grant
-RESPONSE=$(curl -s -X POST "$BASE_URL/api/grants" \
-  -H "Content-Type: application/json" \
-  -d "{\"provider\":\"$PROVIDER\",\"scopes\":$SCOPES_JSON,\"agent_name\":\"$AGENT_NAME\"}")
-
-GRANT_ID=$(echo "$RESPONSE" | python3 -c "import sys,json; print(json.load(sys.stdin)['id'])" 2>/dev/null)
-GRANT_SECRET=$(echo "$RESPONSE" | python3 -c "import sys,json; print(json.load(sys.stdin)['grant_secret'])" 2>/dev/null)
-APPROVAL_URL=$(echo "$RESPONSE" | python3 -c "import sys,json; print(json.load(sys.stdin)['approval_url'])" 2>/dev/null)
-
-if [ -z "$GRANT_ID" ] || [ -z "$GRANT_SECRET" ]; then
-  echo "❌ Failed to create grant:"
-  echo "$RESPONSE"
+if [ -z "${provider:-}" ] || [ -z "${scopes:-}" ]; then
+  echo "usage: tapauth <provider> <scopes>" >&2
   exit 1
 fi
 
-echo "✅ Grant created: $GRANT_ID"
-echo ""
-echo "👉 Please approve at: $APPROVAL_URL"
-echo "   (Link expires in 10 minutes)"
-echo ""
+# Sort scopes for deterministic file naming
+sorted_scopes=$(echo "$scopes" | tr "," "\n" | sort | tr "\n" "," | sed "s/,$//")
+env_file="${TAPAUTH_DIR}/${provider}-${sorted_scopes}.env"
 
-# Step 2: Poll for token
-echo "⏳ Waiting for approval..."
-POLL_INTERVAL=3
-MAX_POLLS=200  # ~10 minutes
+save_and_emit() {
+  install -m 600 /dev/null "$env_file"
+  if ! curl -sf -o "$env_file" "$1" -H "Authorization: Bearer $2"; then
+    echo "tapauth: failed to fetch token" >&2
+    exit 1
+  fi
+  source "$env_file"
+  echo "${TAPAUTH_TOKEN:?tapauth: no token in response}"
+}
 
-for i in $(seq 1 $MAX_POLLS); do
-  TOKEN_RESPONSE=$(curl -s -w "\n%{http_code}" -X POST "$BASE_URL/api/grants/$GRANT_ID/token" \
-    -H "Content-Type: application/json" \
-    -d "{\"grant_secret\":\"$GRANT_SECRET\"}")
-  
-  HTTP_CODE=$(echo "$TOKEN_RESPONSE" | tail -1)
-  BODY=$(echo "$TOKEN_RESPONSE" | sed '$d')
-  
-  case "$HTTP_CODE" in
-    200)
-      echo ""
-      echo "✅ Token received!"
-      echo "$BODY" | python3 -c "
-import sys, json
-data = json.load(sys.stdin)
-print(f\"   Provider:     {data.get('provider', 'unknown')}\")
-print(f\"   Scope:        {data.get('scope', 'unknown')}\")
-print(f\"   Access Token: {data.get('access_token', 'N/A')[:20]}...\")
-" 2>/dev/null
-      
-      # Output just the token for piping
-      echo ""
-      echo "--- TOKEN (pipe-friendly) ---"
-      echo "$BODY" | python3 -c "import sys,json; print(json.load(sys.stdin).get('access_token',''))" 2>/dev/null
-      exit 0
-      ;;
-    202)
-      printf "."
-      sleep "$POLL_INTERVAL"
-      ;;
-    410)
-      echo ""
-      STATUS=$(echo "$BODY" | python3 -c "import sys,json; print(json.load(sys.stdin).get('status','unknown'))" 2>/dev/null)
-      echo "❌ Grant $STATUS"
-      case "$STATUS" in
-        link_expired) echo "   The approval link expired. Run this script again to create a new grant." ;;
-        denied) echo "   The user denied the request." ;;
-        revoked) echo "   The user revoked access." ;;
-        *) echo "   $BODY" ;;
-      esac
-      exit 1
-      ;;
-    *)
-      echo ""
-      echo "❌ Unexpected response ($HTTP_CODE): $BODY"
-      exit 1
-      ;;
+# --- Cached/Refresh Flow ---
+if [ -f "$env_file" ]; then
+  source "$env_file"
+  if [ -n "${TAPAUTH_EXPIRES:-}" ] && [ "$(date +%s)" -lt "${TAPAUTH_EXPIRES:-0}" ]; then
+    echo "${TAPAUTH_TOKEN:-}"
+    exit 0
+  fi
+  save_and_emit "${TAPAUTH_BASE}/api/v1/token/${TAPAUTH_GRANT_ID}.env" "${TAPAUTH_GRANT_SECRET}"
+  exit 0
+fi
+
+# --- First-Run Flow ---
+echo "Creating grant for ${provider} (${sorted_scopes})..." >&2
+grant_response=$(curl -sf "${TAPAUTH_BASE}/api/v1/grants" \
+  -X POST -H "Accept: text/plain" \
+  --data-urlencode "provider=${provider}" \
+  --data-urlencode "scopes=${sorted_scopes}" 2>/dev/null) || true
+if [ -z "${grant_response:-}" ]; then
+  echo "tapauth: failed to create grant (API request failed)" >&2
+  exit 1
+fi
+eval "$(echo "$grant_response" | grep '^TAPAUTH_')"
+if [ -z "${TAPAUTH_GRANT_ID:-}" ] || [ -z "${TAPAUTH_GRANT_SECRET:-}" ] || [ -z "${TAPAUTH_APPROVE_URL:-}" ]; then
+  echo "tapauth: failed to create grant" >&2
+  exit 1
+fi
+echo "Approve access: ${TAPAUTH_APPROVE_URL}" >&2
+while true; do
+  sleep 2
+  response=$(curl -s -w "\n%{http_code}" "${TAPAUTH_BASE}/api/v1/token/${TAPAUTH_GRANT_ID}" \
+    -H "Authorization: Bearer ${TAPAUTH_GRANT_SECRET}")
+  http_code="${response##*$'\n'}"
+  case "$http_code" in
+    200) break ;;
+    202) ;;
+    *) echo "tapauth: error ${http_code}" >&2; exit 1 ;;
   esac
 done
-
-echo ""
-echo "❌ Timed out waiting for approval."
-exit 1
+save_and_emit "${TAPAUTH_BASE}/api/v1/token/${TAPAUTH_GRANT_ID}.env" "${TAPAUTH_GRANT_SECRET}"

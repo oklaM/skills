@@ -1,3 +1,5 @@
+> ⚠️ **Google Contacts is not currently available.** Contact scopes are pending Google OAuth verification.
+
 # Google Contacts via TapAuth
 
 ## Provider Key

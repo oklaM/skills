@@ -1,3 +1,5 @@
+> ⚠️ **Google Drive is not currently available.** Drive scopes are pending Google OAuth verification.
+
 # Google Drive via TapAuth
 
 ## Provider Key

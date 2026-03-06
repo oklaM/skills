@@ -1,7 +1,7 @@
 ---
 name: tapauth
 description: >-
-  Get OAuth tokens for AI agents via TapAuth — the trust layer between humans and AI agents.
+  Get delegated access for AI agents via TapAuth — the trust layer between humans and AI agents.
   Use when your agent needs to access GitHub, Google Workspace, Gmail, Linear, or other OAuth
   providers on behalf of a user. One API call to create an auth request, user approves in browser,
   agent gets scoped tokens. No API key required.
@@ -14,41 +14,86 @@ metadata:
   docs: https://tapauth.ai/docs
 ---
 
-# TapAuth — OAuth Token Broker for AI Agents
+# TapAuth — Delegated Access for AI Agents
 
 TapAuth lets your agent get OAuth tokens from users without handling credentials directly.
 The user approves in their browser. You get a scoped token. That's it.
 
-## The Flow (3 steps)
+## Quickest Start: The CLI
+
+The `tapauth` CLI script is bundled with this skill. Save it and make it executable:
+
+```bash
+# Copy from this skill directory and make executable
+cp /path/to/skill/tapauth ./tapauth
+chmod +x tapauth
+```
+
+Then use it inline with command substitution:
+
+```bash
+# One line. Get a token. Use it.
+curl -H "Authorization: Bearer $(./tapauth google drive.readonly)" \
+  https://www.googleapis.com/drive/v3/files
+```
+
+**First run:** Creates a grant, prints an approval URL to stderr, polls until the user approves, then outputs the token to stdout.
+
+**Subsequent runs:** Returns the cached token instantly — no network call if the token hasn't expired. Automatically refreshes expired tokens.
+
+```bash
+# Example: access Google Calendar
+curl -H "Authorization: Bearer $(./tapauth google calendar.events)" \
+  https://www.googleapis.com/calendar/v3/calendars/primary/events
+```
+
+**Environment variables:**
+- `TAPAUTH_BASE_URL` — Override the base URL (default: `https://tapauth.ai`)
+- `TAPAUTH_HOME` — Override the cache directory (default: `./.tapauth`)
+
+**Security:** Tokens are cached in `.tapauth/` (directory mode 700, files mode 600). Grant secrets are stored locally alongside tokens for automatic refresh.
+
+## The API Flow (v1)
 
 ### Step 1: Create a Grant
 
 ```bash
-curl -X POST https://tapauth.ai/api/grants \
+# JSON
+curl -X POST https://tapauth.ai/api/v1/grants \
   -H "Content-Type: application/json" \
   -d '{
     "provider": "github",
     "scopes": ["repo", "read:user"],
-    "agent_name": "My Agent"
   }'
+
+# Or form-urlencoded (what the CLI uses)
+curl -X POST https://tapauth.ai/api/v1/grants \
+  -H "Accept: text/plain" \
+  --data-urlencode "provider=github" \
+  --data-urlencode "scopes=repo,read:user"
 ```
 
-Response:
+JSON response:
 ```json
 {
-  "id": "grant_abc123",
+  "grant_id": "abc123",
   "grant_secret": "gs_live_xxxx",
-  "approval_url": "https://tapauth.ai/approve/grant_abc123",
-  "status": "pending",
-  "expires_at": "2026-02-14T16:10:00Z"
+  "approve_url": "https://tapauth.ai/approve/abc123"
 }
+```
+
+Text response (with `Accept: text/plain`):
+```
+TAPAUTH_GRANT_ID=abc123
+TAPAUTH_GRANT_SECRET=gs_live_xxxx
+TAPAUTH_APPROVE_URL=https://tapauth.ai/approve/abc123
 ```
 
 **Important:** Save `grant_secret` — you need it to retrieve the token. It's only returned once.
 
 ### Step 2: User Approves
 
-Show the user the `approval_url`. They'll see:
+Show the user the `approve_url`. They'll see:
 - Which agent is requesting access
 - Which provider and scopes
 - Options: approve with full scopes, read-only, or time-limited (1hr/24hr/7d/forever)
@@ -57,38 +102,68 @@ The approval URL expires after **10 minutes**. Create a new grant if it expires.
 
 ### Step 3: Retrieve the Token
 
-Poll until the user approves:
+Poll until the user approves. Use Bearer auth with the grant_secret:
 
 ```bash
-curl -X POST https://tapauth.ai/api/grants/grant_abc123/token \
-  -H "Content-Type: application/json" \
-  -d '{"grant_secret": "gs_live_xxxx"}'
+# Plain text (just the token)
+curl https://tapauth.ai/api/v1/token/{grant_id} \
+  -H "Authorization: Bearer <grant-secret>"
+
+# .env format (token + expiry + grant ID for caching)
+curl https://tapauth.ai/api/v1/token/{grant_id}.env \
+  -H "Authorization: Bearer <grant-secret>"
+
+# JSON format
+curl https://tapauth.ai/api/v1/token/{grant_id}.json \
+  -H "Authorization: Bearer <grant-secret>"
 ```
 
-| Status | HTTP | Meaning |
-|--------|------|---------|
-| `pending` | 202 | User hasn't approved yet. Poll again in 2-5 seconds. |
-| `approved` | 200 | Token returned in response body. |
-| `denied` | 410 | User denied the request. |
-| `revoked` | 410 | User revoked access after approving. |
-| `link_expired` | 410 | Approval URL expired (10 min). Create a new grant. |
+| HTTP | Meaning |
+|------|---------|
+| 200 | Token returned in response body |
+| 202 | Pending — user hasn't approved yet. Poll again in 2-5 seconds |
+| 401 | Invalid or missing grant_secret |
+| 404 | Grant not found |
+| 410 | Grant expired, revoked, denied, or link expired |
 
-On 200, the response includes:
+JSON response (`.json`):
 ```json
 {
-  "access_token": "gho_xxxx",
-  "token_type": "bearer",
-  "scope": "repo,read:user",
-  "provider": "github"
+  "token": "gho_xxxx",
+  "expires": "2026-03-05T17:00:00Z",
+  "provider": "github",
+  "grant_id": "abc123"
 }
 ```
+
+Env response (`.env`):
+```
+TAPAUTH_TOKEN=gho_xxxx
+TAPAUTH_EXPIRES=1741194000
+TAPAUTH_GRANT_ID=abc123
+TAPAUTH_GRANT_SECRET=gs_live_xxxx
+```
+
+## Revocation & Token Lifetimes
+
+TapAuth uses zero-knowledge encryption — tokens are encrypted with your `grant_secret`, which TapAuth never stores. This means:
+
+- **TapAuth cannot revoke tokens at the provider level.** We literally cannot decrypt them.
+- When a grant expires, we delete the encrypted ciphertext without ever reading it.
+- For short-lived token providers (Google ~1hr, Linear ~1hr, Sentry ~8hr): tokens expire naturally.
+- For never-expiring tokens (GitHub, Slack, Vercel, Notion): manually revoke in your provider settings if needed.
+
+We recommend setting `expires_in` for grants requesting long-lived tokens.
 
 ## Quick Reference
 
 | What | Endpoint | Method |
 |------|----------|--------|
-| Create grant | `/api/grants` | POST |
-| Get token | `/api/grants/{id}/token` | POST |
+| Create grant | `/api/v1/grants` | POST |
+| Get token | `/api/v1/token/{id}` | GET |
+| Get token (.env) | `/api/v1/token/{id}.env` | GET |
+| Get token (.json) | `/api/v1/token/{id}.json` | GET |
+| CLI | `$(tapauth <provider> <scopes>)` | — |
 
 No API key needed. No signup needed. The user's approval is the only gate.
 
@@ -96,40 +171,61 @@ No API key needed. No signup needed. The user's approval is the only gate.
 
 See the `references/` directory for provider-specific scopes, examples, and gotchas:
 
-- **GitHub** → `references/github.md` — repos, issues, PRs, user data
-- **Google** → `references/google.md` — Gmail, Drive, Calendar, Sheets, Docs, Contacts (all scopes)
+- **GitHub** (`github`) → `references/github.md` — repos, issues, PRs, user data, gists, workflows
+- **Google** (`google`) → `references/google.md` — Gmail, Drive, Calendar, Sheets, Docs, Contacts (all scopes)
 - **Gmail** → `references/gmail.md` — read, send, manage emails (uses `google` provider)
-- **Google Drive** → `references/google_drive.md` — focused Drive-only access
-- **Google Contacts** → `references/google_contacts.md` — view and manage contacts
-- **Google Sheets** → `references/google_sheets.md` — read and write spreadsheets
-- **Google Docs** → `references/google_docs.md` — read and write documents
-- **Linear** → `references/linear.md` — issues, projects, teams
-- **Vercel** → `references/vercel.md` — deployments, projects, env vars, domains
-- **Notion** → `references/notion.md` — pages, databases, search
-- **Slack** → `references/slack.md` — channels, messages, users, files
-- **Sentry** → `references/sentry.md` — error tracking, projects, organizations
-- **Asana** → `references/asana.md` — tasks, projects, workspaces
+- **Google Drive** (`google_drive`) → `references/google_drive.md` — focused Drive-only access
+- **Google Contacts** (`google_contacts`) → `references/google_contacts.md` — view and manage contacts
+- **Google Sheets** (`google_sheets`) → `references/google_sheets.md` — read and write spreadsheets
+- **Google Docs** (`google_docs`) → `references/google_docs.md` — read and write documents
+- **Linear** (`linear`) → `references/linear.md` — issues, projects, teams
+- **Vercel** (`vercel`) → `references/vercel.md` — deployments, projects, env vars, domains
+- **Notion** (`notion`) → `references/notion.md` — pages, databases, search
+- **Slack** (`slack`) → `references/slack.md` — channels, messages, users, files
+- **Sentry** (`sentry`) → `references/sentry.md` — error tracking, projects, organizations
+- **Asana** (`asana`) → `references/asana.md` — tasks, projects, workspaces
 
 > **Tip:** The focused Google providers (`google_drive`, `google_sheets`, etc.) show simpler consent screens.
 > Use them when you only need one Google service. Use `google` when you need multiple services.
 
-## Helper Script
+## Provider Discovery
 
-For a complete grant-creation + polling flow, use the bundled script:
+To programmatically list all available providers and their valid scopes:
 
 ```bash
-./scripts/tapauth.sh github "repo,read:user" "My Agent"
+curl https://tapauth.ai/api/providers
 ```
 
-It creates the grant, prints the approval URL, polls for the token, and outputs it when ready.
+This returns each provider with its ID, name, category, available scopes, and whether token refresh is supported.
+
+## Provider Notes
+
+- **GitHub:** Tokens use OAuth app authentication. The `repo` scope grants read/write access to repositories. Repo creation requires the user to have appropriate GitHub permissions. Some operations available with GitHub PATs may not work with OAuth tokens.
+- **Google:** All Google providers support automatic token refresh. Use focused providers (google_drive, google_sheets, etc.) for simpler consent screens when you only need one service.
+- **Discord:** Uses user OAuth tokens (not bot tokens). Tokens expire after ~7 days with automatic refresh. The `guilds` scope returns server list only — no channel/message access.
+- **Vercel/Slack/Notion:** These are integration-level providers — scopes are fixed at installation time, not per-request.
+
+## CLI Tool
+
+For a complete grant-creation + polling + caching flow, use the `tapauth` CLI:
+
+```bash
+# Install: copy packages/cli/tapauth to your PATH
+TOKEN=$(tapauth github repo,read:user)
+
+# First run: creates grant, shows approval URL, polls until approved
+# Subsequent runs: returns cached token (auto-refreshes when expired)
+```
+
+The CLI stores credentials in `.tapauth/` (mode 700) with per-provider-scope cache files.
 
 ## Common Patterns
 
 ### Ask the user to approve, then proceed
 ```
 1. Create grant for the provider/scopes you need
-2. Tell the user: "Please approve access at: {approval_url}"
-3. Poll /api/grants/{id}/token every 3 seconds
+2. Tell the user: "Please approve access at: {approve_url}"
+3. Poll GET /api/v1/token/{id} (with Bearer auth) every 3 seconds
 4. Once approved, use the token for API calls
 ```
 

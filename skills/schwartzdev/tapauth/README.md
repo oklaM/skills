@@ -1,6 +1,6 @@
 # TapAuth Agent Skill
 
-> OAuth token broker for AI agents. One API call to connect any OAuth provider.
+> Delegated access broker for AI agents. One API call to connect any OAuth provider.
 
 This is the official [Agent Skill](https://agentskills.io) for [TapAuth](https://tapauth.ai) — the trust layer between humans and AI agents.
 
@@ -43,15 +43,26 @@ No API key needed. No signup needed. The user's approval is the only gate.
 
 ## Quick Example
 
-```bash
-# Your agent runs this:
-curl -X POST https://tapauth.ai/api/grants \
-  -H "Content-Type: application/json" \
-  -d '{"provider": "github", "scopes": ["repo"], "agent_name": "My Agent"}'
+### CLI (recommended)
 
-# User clicks the approval URL
-# Agent polls for the token
-# Agent uses the token to access GitHub on the user's behalf
+```bash
+# One command. Token comes back ready to use.
+TOKEN=$(tapauth github repo)
+curl -H "Authorization: Bearer $TOKEN" https://api.github.com/user/repos
+```
+
+### API (v1)
+
+```bash
+# 1. Create a grant
+curl -X POST https://tapauth.ai/api/v1/grants \
+  -H "Content-Type: application/json" \
+  -d '{"provider": "github", "scopes": ["repo"]}'
+
+# 2. User clicks the approve_url
+# 3. Retrieve the token
+curl https://tapauth.ai/api/v1/token/{grant_id} \
+  -H "Authorization: Bearer gs_..."
 ```
 
 ## Links
