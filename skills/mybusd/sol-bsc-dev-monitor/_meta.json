@@ -1,0 +1,11 @@
+{
+  "owner": "mybusd",
+  "slug": "sol-bsc-dev-monitor",
+  "displayName": "sol-bsc-dev-monitor-skill",
+  "latest": {
+    "version": "1.0.4",
+    "publishedAt": 1772763606539,
+    "commit": null
+  },
+  "history": []
+}
