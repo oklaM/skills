@@ -26,6 +26,7 @@
   "watched_calendars": [],
   "ignored_calendars": [],
   "action_cleanup_days": 30,
+  "event_relink_tolerance_sec": 300,
   "notes_destination": "local",
   "notes_path": "~/.openclaw/workspace/skills/proactive-claw/outcomes/",
 
@@ -69,15 +70,18 @@
     "chat_id": ""
   },
 
-  "_clawhub_comment": "Optional: set clawhub_token to auto-download credentials.json via clawhub OAuth during setup.",
+  "_clawhub_comment": "Optional: remote credentials bootstrap from clawhub.ai (off by default). Requires token + explicit allow flag + SHA-256 pin.",
   "clawhub_token": "",
+  "clawhub_oauth_allow_remote_fetch": false,
+  "clawhub_credentials_sha256": "",
 
   "_nextcloud_comment": "Only used if calendar_backend = 'nextcloud'. Use an app-specific password.",
   "nextcloud": {
     "url": "",
     "username": "",
     "password": "",
-    "openclaw_calendar_url": ""
+    "openclaw_calendar_url": "",
+    "caldav_path": "/remote.php/dav"
   },
 
   "_llm_rater_comment": "Defaults to local Ollama — no API key needed, no data leaves machine.",
