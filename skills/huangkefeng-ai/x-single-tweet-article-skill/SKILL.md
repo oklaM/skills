@@ -11,7 +11,7 @@ Charge-first fetcher for:
 
 ## Pricing
 - 0.001 USDT per call
-- If low balance: returns `PAYMENT_URL`
+- If balance is insufficient: returns `PAYMENT_URL` as a top-up link (no charge is made)
 
 ## Run
 
@@ -28,4 +28,3 @@ node scripts/run.js --article "https://x.com/i/article/xxxxx" --user "user-1"
 - `SKILL_BILLING_API_KEY`
 - `SKILL_ID`
 - `SKILLPAY_PRICE_TOKEN`
-- `X_TWEET_FETCHER_PATH` (default points to local cloned repo)

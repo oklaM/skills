@@ -3,11 +3,16 @@
   "slug": "x-single-tweet-article-skill",
   "displayName": "X Single Tweet + Article",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1772729129136,
-    "commit": "https://github.com/openclaw/skills/commit/7a3e832beaffb27efb7f392c3e637abdd1bc1c57"
+    "version": "1.0.4",
+    "publishedAt": 1772729743005,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1772729129136,
+      "commit": "https://github.com/openclaw/skills/commit/7a3e832beaffb27efb7f392c3e637abdd1bc1c57"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1772726809366,

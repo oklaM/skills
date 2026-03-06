@@ -120,12 +120,21 @@ async function fetchArticle(u) {
 }
 
 (async () => {
-  // Local verification mode: skip billing for content validation.
+  const c = await charge();
+  if (!c.ok) {
+    if (c?.data?.payment_url) {
+      console.error(`PAYMENT_URL:${c.data.payment_url}`);
+      console.error('PAYMENT_INFO:Insufficient balance. Top up and retry.');
+    }
+    console.error(JSON.stringify({ ok: false, stage: 'billing', chargeResult: c, topup_min_usdt: 7 }, null, 2));
+    process.exit(2);
+  }
+
   const result = url ? await fetchTweet(url) : await fetchArticle(article);
   if (!result) {
     console.error(JSON.stringify({ ok: false, stage: 'fetch', message: 'fetch_failed' }, null, 2));
     process.exit(3);
   }
 
-  console.log(JSON.stringify({ ok: true, charged: false, ...result }, null, 2));
+  console.log(JSON.stringify({ ok: true, charged: true, ...result }, null, 2));
 })();
