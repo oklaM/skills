@@ -4,36 +4,42 @@ description: Search, compare, and score flights with jetlag optimization
 metadata: {"openclaw": {"emoji": "🛫", "primaryEnv": "AEROBASE_API_KEY", "user-invocable": true, "homepage": "https://aerobase.app"}}
 ---
 
-# Flight Search & Jetlag Scoring
+# Aerobase Flight Search
 
-Search flights, compare options, and get jetlag optimization scores.
+Find the perfect flight with jetlag optimization. Aerobase.app scores every flight 0-100 for recovery impact — so you arrive fresh.
+
+**Why Aerobase?**
+- 😴 **Jetlag scoring** — Every flight scored 0-100 for recovery
+- 🔍 **Compare options** — Side-by-side comparison
+- 🎯 **Multi-provider** — Kiwi, Amadeus, and more
+- 📊 **Smart ranking** — Best value = price + jetlag combined
+
+## What This Skill Does
+
+- Search flights with jetlag scoring
+- Compare multiple flight options
+- Score flights 0-100 for recovery impact
+- Recommend optimal departure/arrival times
+- Generate recovery plans for each trip
+
+## Example Conversations
+
+```
+User: "Find flights from LAX to NRT next week - but I need to be functional the next day"
+→ Scores each flight for jetlag
+→ Prioritizes recovery-friendly times
+→ Recommends best option for productivity
+
+User: "Compare these 3 flights for jetlag impact"
+→ Side-by-side comparison
+→ Shows recovery days for each
+→ Recommends optimal choice
+```
 
 ## API Endpoints
 
-### Search
-
-**POST /api/v1/flights/search**
-Search flights with jetlag scoring.
-
-Request:
-```json
-{
-  "from": "JFK",
-  "to": "LHR", 
-  "date": "2026-03-15",
-  "returnDate": "2026-03-22",
-  "cabinClass": "economy"
-}
-```
-
-Returns flights sorted by jetlag composite score (best first).
-
-### Score
-
 **POST /api/v1/flights/score**
-Score a specific flight for jetlag impact (0-100).
 
-Request:
 ```json
 {
   "from": "LAX",
@@ -44,31 +50,33 @@ Request:
 }
 ```
 
-Response includes:
-- Score (0-100, higher = less jetlag)
-- Recovery days estimate
-- Direction (eastbound/westbound)
-- Strategy tips
+Returns score (0-100), recovery days, direction, and strategies.
 
-### Compare
-
-**POST /api/v1/flights/compare**
-Compare 2-10 flights side-by-side.
-
-### Lookup
-
-**GET /api/v1/flights/lookup/{carrier}/{number}**
-Look up flight details by airline code and flight number.
+**POST /api/v1/flights/search** — Search with scoring
+**POST /api/v1/flights/compare** — Compare multiple flights
 
 ## Rate Limits
 
 - **Free tier**: 5 API requests per day
-- **Premium tier**: Unlimited requests
+- **Premium tier**: Unlimited requests + recovery plans
 
-## Configuration
+Get free API key at: https://aerobase.app/connect
 
-```bash
-export AEROBASE_API_KEY="your_api_key_here"
-```
+## Premium: Recovery Plans
 
-Get your API key at: https://aerobase.app/connect
+Premium subscribers get personalized recovery plans:
+- Pre-trip preparation schedule
+- In-flight strategies
+- Arrival timing recommendations
+- Sleep/diet adjustments
+
+→ https://aerobase.app/concierge/pricing
+
+## Get the Full Experience
+
+Want ALL travel capabilities? Install the complete **Aerobase Travel Concierge** skill:
+- Flights, hotels, lounges, awards, activities, deals, wallet
+- Plus premium recovery plans
+- One skill for everything
+
+→ https://clawhub.ai/kurosh87/aerobase-travel-concierge
