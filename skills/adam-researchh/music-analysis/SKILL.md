@@ -82,11 +82,31 @@ The tool needs a real audio file on disk. Source options:
 
 ## Optional: Whisper transcription
 
-If local whisper CLI is installed, run separately for lyrics:
+For lyrics/speech transcription, auto-detect which Whisper CLI is available:
 
 ```bash
-whisper track.mp3 --model small --output_format json --output_dir /tmp
+# Detection priority: whisper-cli (C++ port) > whisper (Python)
+# If neither is found, skip transcription gracefully — it's optional.
+
+# 1. Check for whisper-cpp (faster on Apple Silicon):
+if command -v whisper-cli &>/dev/null; then
+  # Requires WAV input — convert first
+  ffmpeg -i track.mp3 -ar 16000 -ac 1 /tmp/track.wav
+  whisper-cli -m ~/.local/share/whisper-cpp/ggml-medium.bin -f /tmp/track.wav --output-json
+
+# 2. Fallback to Python whisper (accepts mp3/wav/flac directly):
+elif command -v whisper &>/dev/null; then
+  whisper track.mp3 --model small --output_format json --output_dir /tmp
+
+# 3. Neither installed — skip, don't fail
+else
+  echo "No Whisper CLI found. Skipping transcription. Install: brew install whisper-cpp OR pip install openai-whisper"
+fi
 ```
+
+### Install options
+- **whisper-cpp** (recommended for Apple Silicon): `brew install whisper-cpp`, then download a model from https://huggingface.co/ggerganov/whisper.cpp/tree/main
+- **OpenAI whisper** (Python): `pip install openai-whisper`
 
 ## Dependencies
 

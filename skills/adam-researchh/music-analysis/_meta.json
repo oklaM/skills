@@ -3,9 +3,15 @@
   "slug": "music-analysis",
   "displayName": "Music Analysis",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1772676728396,
-    "commit": "https://github.com/openclaw/skills/commit/1e4611dd8dd47d32cb7f34660123d58708b04a04"
+    "version": "1.1.0",
+    "publishedAt": 1772771676233,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1772676728396,
+      "commit": "https://github.com/openclaw/skills/commit/1e4611dd8dd47d32cb7f34660123d58708b04a04"
+    }
+  ]
 }
