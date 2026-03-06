@@ -1,0 +1,11 @@
+{
+  "owner": "googleworkspace-bot",
+  "slug": "gws-sheets-read",
+  "displayName": "Gws Sheets Read",
+  "latest": {
+    "version": "1.0.0",
+    "publishedAt": 1772757044413,
+    "commit": null
+  },
+  "history": []
+}
