@@ -3,7 +3,7 @@
 [![MCP Native](https://img.shields.io/badge/MCP-Native-blue.svg)](https://modelcontextprotocol.io)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-A **Model Context Protocol (MCP)** server for [PicSee](https://picsee.io) — URL shortening, click analytics, and link management. Built for AI agents like **Claude Code**, **OpenClaw**, and **Cursor**.
+A **Model Context Protocol (MCP)** server for [PicSee](https://picsee.io) — URL shortening with QR code generation, click analytics, and link management. Built for AI agents like **Claude Code**, **OpenClaw**, and **Cursor**.
 
 ---
 
@@ -17,10 +17,11 @@ A **Model Context Protocol (MCP)** server for [PicSee](https://picsee.io) — UR
 ## 🌟 Features
 
 - **Dual-Mode Operation** — Unauthenticated (basic shortening) and Authenticated (full management) with automatic detection
+- **URL Shortening + QR Codes** — Create short links and instantly generate QR codes (300x300px, customizable)
+- **Visual Analytics** — Total clicks, unique clicks, daily trends, and optional chart generation
 - **Secure Token Storage** — AES-256-CBC encryption with machine-specific key derivation (hostname + username → SHA-256). Tokens never stored in plaintext
-- **Analytics** — Total clicks, unique clicks, and daily traffic trends
 - **Link Management** — Search, filter (tags, stars, keywords), edit, and delete
-- **Agent Recipes** — Built-in instructions for QR code generation and analytics chart visualization
+- **Agent-Ready** — Built-in instructions for proactive QR code and chart generation workflows
 
 ---
 
@@ -29,8 +30,10 @@ A **Model Context Protocol (MCP)** server for [PicSee](https://picsee.io) — UR
 | Tool | Description | Auth |
 |:-----|:------------|:-----|
 | `shorten_url` | Create a `pse.is` short link with optional custom slug, tags, UTM, and preview metadata. Auto-detects auth mode | Optional |
+| `generate_qr_code` | Generate a QR code URL for any short link (300x300px default, customizable size) | No |
 | `get_analytics` | Click statistics — total, unique, and daily breakdown for the past 60 days | Required |
-| `list_links` | List and search link history with filters (tags, keywords, UTM, stars, author, date range) | Required |
+| `generate_analytics_chart` | Generate a line chart URL visualizing daily click trends | No |
+| `list_links` | List and search link history with filters (tags, keywords, stars, author, date range) | Required |
 | `edit_link` | Update destination URL, slug, title, description, thumbnail, tags, UTM, tracking pixels, expiration (Advanced plan) | Required |
 | `delete_link` | Delete or recover a short link | Required |
 | `setup_auth` | Verify and encrypt your PicSee API token locally | No |
@@ -41,8 +44,20 @@ A **Model Context Protocol (MCP)** server for [PicSee](https://picsee.io) — UR
 
 ### Claude Code
 
-Add to `.claude/settings.json`:
+```bash
+claude mcp add picsee -- node /path/to/picsee-short-link/mcp-server/dist/index.js
+```
 
+Replace `/path/to/` with the actual path to the skill directory.
+
+### Cursor
+
+Edit Cline MCP settings file:
+- **macOS**: `~/Library/Application Support/Cursor/User/globalStorage/saoudrizwan.claude-dev/settings/cline_mcp_settings.json`
+- **Windows**: `%APPDATA%\Cursor\User\globalStorage\saoudrizwan.claude-dev\settings\cline_mcp_settings.json`
+- **Linux**: `~/.config/Cursor/User/globalStorage/saoudrizwan.claude-dev/settings/cline_mcp_settings.json`
+
+Add:
 ```json
 {
   "mcpServers": {
@@ -53,6 +68,8 @@ Add to `.claude/settings.json`:
   }
 }
 ```
+
+Then restart Cursor.
 
 ### OpenClaw (via mcporter)
 
@@ -66,9 +83,25 @@ Then call tools:
 mcporter call picsee.shorten_url url="https://example.com/long-url"
 ```
 
+### ClawHub
+
+Install via ClawHub CLI:
+
+```bash
+clawhub install picsee-short-link
+```
+
+MCP server registration is handled automatically.
+
 ### Smithery
 
-> Coming soon. The server is designed to be Smithery-compatible — see `smithery.yaml` in the repository.
+Install via Smithery registry:
+
+```bash
+npx @smithery/cli install picsee/short-link
+```
+
+Or browse: [https://smithery.ai/skills/picsee/short-link](https://smithery.ai/skills/picsee/short-link)
 
 ---
 
@@ -93,8 +126,6 @@ These recipes are documented in `SKILL.md` for agents that support the OpenClaw 
 | **File Permissions** | `0600` (owner read/write only) |
 | **Logging** | None — no URLs or metadata are logged by this server |
 
-The encryption format (`iv_hex:ciphertext_hex`) is shared between the MCP server and the legacy CLI scripts, so existing tokens work without re-authentication.
-
 ---
 
 ## 📁 Project Structure
@@ -110,7 +141,6 @@ picsee-short-link/
 │   ├── package.json
 │   ├── tsconfig.json
 │   └── smithery.yaml
-├── scripts/              # Legacy CLI scripts (.mjs)
 ├── references/           # API documentation
 ├── SKILL.md              # OpenClaw skill definition
 ├── README.md             # This file
