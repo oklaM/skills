@@ -1,7 +1,7 @@
 # GeoCommerce Automator
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org/licenses/MIT)
-[![Version](https://img.shields.io/badge/Version-3.0.0-blue.svg)](https://github.com/GEO-SEO/geo-visual-opportunity-engine)
+[![Version](https://img.shields.io/badge/Version-1.0.5-blue.svg)](https://clawhub.ai/GEO-SEO/geo-visual-opportunity-engine)
 [![Platform](https://img.shields.io/badge/Platform-Dify%20%7C%20Coze%20%7C%20Python-orange.svg)](#)
 [![Shopify](https://img.shields.io/badge/Shopify-API%20Integration-purple.svg)](#)
 [![WooCommerce](https://img.shields.io/badge/WooCommerce-API%20Integration-purple.svg)](#)
@@ -83,9 +83,24 @@
 
 ### Installation
 
+#### One-Click Installation (Recommended)
+
+```bash
+# Download and install automatically
+curl -sL https://clawhub.ai/GEO-SEO/geo-visual-opportunity-engine/archive/refs/heads/main.tar.gz | tar xz && cd geo-visual-opportunity-engine-* && pip install -r requirements.txt
+```
+
+Or use wget:
+
+```bash
+wget -qO- https://clawhub.ai/GEO-SEO/geo-visual-opportunity-engine/archive/refs/heads/main.tar.gz | tar xz && cd geo-visual-opportunity-engine-* && pip install -r requirements.txt
+```
+
+#### Manual Installation
+
 ```bash
 # Clone the repository
-git clone https://github.com/GEO-SEO/geo-visual-opportunity-engine.git
+git clone https://clawhub.ai/GEO-SEO/geo-visual-opportunity-engine.git
 cd geo-visual-opportunity-engine
 
 # Install dependencies
@@ -282,6 +297,12 @@ geo-visual-opportunity-engine/
 - Russian
 
 ## Version History
+
+### v1.0.5 (2026-03-06)
+
+- Updated repository URL to https://clawhub.ai/GEO-SEO/geo-visual-opportunity-engine
+- Added one-click installation instructions
+- Improved installation documentation
 
 ### v3.0.0 (2026-02-28)
 

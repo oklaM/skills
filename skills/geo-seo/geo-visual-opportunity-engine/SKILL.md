@@ -1,6 +1,6 @@
 ---
 name: geo-visual-opportunity-engine
-description: GEO Visual Opportunity Engine workflow skill.
+description: AutoList automates product onboarding for independent stores: AI-generated titles, descriptions, and images, plus built-in SEO & GEO (Generative Engine Optimization) so your pages are both user-friendly and easy for AIs to discover. Publish a ready product in minutes with one click.
 ---
 
 # GEO Visual Opportunity Engine
@@ -19,7 +19,27 @@ GEO Visual Opportunity Engine is an AI-powered e-commerce automation tool that g
 
 ## Installation
 
+### One-Click Installation (Recommended)
+
 ```bash
+# Download and install automatically
+curl -sL https://clawhub.ai/GEO-SEO/geo-visual-opportunity-engine/archive/refs/heads/main.tar.gz | tar xz && cd geo-visual-opportunity-engine-* && pip install -r requirements.txt
+```
+
+Or use wget:
+
+```bash
+wget -qO- https://clawhub.ai/GEO-SEO/geo-visual-opportunity-engine/archive/refs/heads/main.tar.gz | tar xz && cd geo-visual-opportunity-engine-* && pip install -r requirements.txt
+```
+
+### Manual Installation
+
+```bash
+# Clone the repository
+git clone https://clawhub.ai/GEO-SEO/geo-visual-opportunity-engine.git
+cd geo-visual-opportunity-engine
+
+# Install dependencies
 pip install -r requirements.txt
 ```
 
@@ -135,7 +155,7 @@ Complete e-commerce product creation workflow.
 
 ## Version
 
-3.0.0
+1.0.5
 
 ## Author
 

@@ -1,6 +1,6 @@
 {
   "name": "ecommerce-automator",
-  "version": "3.0.0",
+  "version": "1.0.5",
   "display_name": "电商 Automator (E-commerce Automator)",
   "display_name_en": "E-commerce Automator",
   "description": "AI-powered e-commerce automation tool that generates product images using Nano Banana 2 and automatically publishes products to Shopify and WooCommerce/WordPress. Features: auto image generation, product data synthesis, SKU/price/inventory management, and one-click publishing to multiple e-commerce platforms.",
@@ -23,7 +23,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/GEO-SEO/geo-visual-opportunity-engine"
+    "url": "https://clawhub.ai/GEO-SEO/geo-visual-opportunity-engine"
   },
   "entry_point": "src/main.py",
   "model_config": {
@@ -84,7 +84,7 @@
     }
   },
   "created_at": "2025-03-10",
-  "updated_at": "2026-02-28",
+  "updated_at": "2026-03-06",
   "metadata": {
     "schema_version": "3.0",
     "skill_type": "ecommerce-automation",

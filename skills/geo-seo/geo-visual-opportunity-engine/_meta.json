@@ -1,11 +1,17 @@
 {
   "owner": "geo-seo",
   "slug": "geo-visual-opportunity-engine",
-  "displayName": "geo-visual-opportunity-engine",
+  "displayName": "CMS Automated Product Onboarding + SEO/GEO",
   "latest": {
-    "version": "1.0.4",
-    "publishedAt": 1772505459196,
-    "commit": "https://github.com/openclaw/skills/commit/cb15437415be768d231a0693d0930bdad69e7749"
+    "version": "1.0.6",
+    "publishedAt": 1772765680293,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.4",
+      "publishedAt": 1772505459196,
+      "commit": "https://github.com/openclaw/skills/commit/cb15437415be768d231a0693d0930bdad69e7749"
+    }
+  ]
 }
