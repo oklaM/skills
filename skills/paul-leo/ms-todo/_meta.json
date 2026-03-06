@@ -3,9 +3,15 @@
   "slug": "ms-todo",
   "displayName": "Ms Todo",
   "latest": {
-    "version": "0.1.0",
-    "publishedAt": 1772677741391,
-    "commit": "https://github.com/openclaw/skills/commit/c83f98270960e6d2edb1d9a2ae791c83676d6cb7"
+    "version": "0.1.1",
+    "publishedAt": 1772786443029,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "0.1.0",
+      "publishedAt": 1772677741391,
+      "commit": "https://github.com/openclaw/skills/commit/c83f98270960e6d2edb1d9a2ae791c83676d6cb7"
+    }
+  ]
 }
