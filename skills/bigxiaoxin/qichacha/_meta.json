@@ -3,9 +3,15 @@
   "slug": "qichacha",
   "displayName": "企查查",
   "latest": {
-    "version": "1.1.0",
-    "publishedAt": 1772803446730,
-    "commit": "https://github.com/openclaw/skills/commit/266821796910e9353123795831c227e92e66d005"
+    "version": "1.2.1",
+    "publishedAt": 1772804483499,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.1.0",
+      "publishedAt": 1772803446730,
+      "commit": "https://github.com/openclaw/skills/commit/266821796910e9353123795831c227e92e66d005"
+    }
+  ]
 }
