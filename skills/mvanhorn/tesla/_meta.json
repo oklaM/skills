@@ -1,13 +1,18 @@
 {
   "owner": "mvanhorn",
   "slug": "tesla",
-  "displayName": "OpenClaw Tesla",
+  "displayName": "Tesla",
   "latest": {
-    "version": "1.0.4",
-    "publishedAt": 1770827752312,
-    "commit": "https://github.com/openclaw/skills/commit/49dfd0236de987decd365a6327bd055d84738f93"
+    "version": "1.3.1",
+    "publishedAt": 1772859039387,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.4",
+      "publishedAt": 1770827752312,
+      "commit": "https://github.com/openclaw/skills/commit/49dfd0236de987decd365a6327bd055d84738f93"
+    },
     {
       "version": "1.0.3",
       "publishedAt": 1770779242413,

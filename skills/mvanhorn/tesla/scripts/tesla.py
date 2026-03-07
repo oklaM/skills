@@ -19,33 +19,9 @@ from pathlib import Path
 CACHE_FILE = Path.home() / ".tesla_cache.json"
 
 
-def get_email_from_cache() -> str | None:
-    """Try to get email from cache file."""
-    if CACHE_FILE.exists():
-        try:
-            with open(CACHE_FILE) as f:
-                cache = json.load(f)
-                if cache:
-                    return next(iter(cache.keys()))
-        except (json.JSONDecodeError, StopIteration):
-            pass
-    return None
-
-
-def get_tesla(email: str | None = None):
+def get_tesla(email: str):
     """Get authenticated Tesla instance."""
     import teslapy
-    
-    # Try in order: passed email, env var, cache file
-    if not email:
-        email = os.environ.get("TESLA_EMAIL")
-    if not email:
-        email = get_email_from_cache()
-    
-    if not email:
-        print("❌ Error: No Tesla email found", file=sys.stderr)
-        print("Run: TESLA_EMAIL=you@example.com python tesla.py auth", file=sys.stderr)
-        sys.exit(1)
     
     def custom_auth(url):
         print(f"\n🔐 Open this URL in your browser:\n{url}\n")
@@ -102,7 +78,7 @@ def cmd_auth(args):
 
 def cmd_list(args):
     """List all vehicles."""
-    tesla = get_tesla(args.email)
+    tesla = get_tesla(args.email or os.environ.get("TESLA_EMAIL"))
     vehicles = tesla.vehicle_list()
     
     print(f"Found {len(vehicles)} vehicle(s):\n")
@@ -115,7 +91,7 @@ def cmd_list(args):
 
 def cmd_status(args):
     """Get vehicle status."""
-    tesla = get_tesla(args.email)
+    tesla = get_tesla(args.email or os.environ.get("TESLA_EMAIL"))
     vehicle = get_vehicle(tesla, args.car)
     
     wake_vehicle(vehicle)
@@ -141,7 +117,7 @@ def cmd_status(args):
 
 def cmd_lock(args):
     """Lock the vehicle."""
-    tesla = get_tesla(args.email)
+    tesla = get_tesla(args.email or os.environ.get("TESLA_EMAIL"))
     vehicle = get_vehicle(tesla, args.car)
     wake_vehicle(vehicle)
     vehicle.command('LOCK')
@@ -150,7 +126,7 @@ def cmd_lock(args):
 
 def cmd_unlock(args):
     """Unlock the vehicle."""
-    tesla = get_tesla(args.email)
+    tesla = get_tesla(args.email or os.environ.get("TESLA_EMAIL"))
     vehicle = get_vehicle(tesla, args.car)
     wake_vehicle(vehicle)
     vehicle.command('UNLOCK')
@@ -159,7 +135,7 @@ def cmd_unlock(args):
 
 def cmd_climate(args):
     """Control climate."""
-    tesla = get_tesla(args.email)
+    tesla = get_tesla(args.email or os.environ.get("TESLA_EMAIL"))
     vehicle = get_vehicle(tesla, args.car)
     wake_vehicle(vehicle)
     
@@ -177,7 +153,7 @@ def cmd_climate(args):
 
 def cmd_charge(args):
     """Control charging."""
-    tesla = get_tesla(args.email)
+    tesla = get_tesla(args.email or os.environ.get("TESLA_EMAIL"))
     vehicle = get_vehicle(tesla, args.car)
     wake_vehicle(vehicle)
     
@@ -201,7 +177,7 @@ def cmd_charge(args):
 
 def cmd_location(args):
     """Get vehicle location."""
-    tesla = get_tesla(args.email)
+    tesla = get_tesla(args.email or os.environ.get("TESLA_EMAIL"))
     vehicle = get_vehicle(tesla, args.car)
     wake_vehicle(vehicle)
     
@@ -215,7 +191,7 @@ def cmd_location(args):
 
 def cmd_honk(args):
     """Honk the horn."""
-    tesla = get_tesla(args.email)
+    tesla = get_tesla(args.email or os.environ.get("TESLA_EMAIL"))
     vehicle = get_vehicle(tesla, args.car)
     wake_vehicle(vehicle)
     vehicle.command('HONK_HORN')
@@ -224,7 +200,7 @@ def cmd_honk(args):
 
 def cmd_flash(args):
     """Flash the lights."""
-    tesla = get_tesla(args.email)
+    tesla = get_tesla(args.email or os.environ.get("TESLA_EMAIL"))
     vehicle = get_vehicle(tesla, args.car)
     wake_vehicle(vehicle)
     vehicle.command('FLASH_LIGHTS')
@@ -233,7 +209,7 @@ def cmd_flash(args):
 
 def cmd_wake(args):
     """Wake up the vehicle."""
-    tesla = get_tesla(args.email)
+    tesla = get_tesla(args.email or os.environ.get("TESLA_EMAIL"))
     vehicle = get_vehicle(tesla, args.car)
     print(f"⏳ Waking {vehicle['display_name']}...")
     vehicle.sync_wake_up()
@@ -281,9 +257,6 @@ def main():
     # Wake
     subparsers.add_parser("wake", help="Wake up the vehicle")
     
-    # Defrost
-    subparsers.add_parser("defrost", help="Turn on max defrost")
-    
     args = parser.parse_args()
     
     commands = {
@@ -298,7 +271,6 @@ def main():
         "honk": cmd_honk,
         "flash": cmd_flash,
         "wake": cmd_wake,
-        "defrost": cmd_defrost,
     }
     
     try:
@@ -306,15 +278,6 @@ def main():
     except Exception as e:
         print(f"❌ Error: {e}", file=sys.stderr)
         sys.exit(1)
-
-
-def cmd_defrost(args):
-    """Turn on max defrost."""
-    tesla = get_tesla(args.email)
-    vehicle = get_vehicle(tesla, args.car)
-    wake_vehicle(vehicle)
-    vehicle.command('MAX_DEFROST', on=True)
-    print(f"🔥 {vehicle['display_name']} max defrost ON")
 
 
 if __name__ == "__main__":
