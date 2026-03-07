@@ -1,13 +1,18 @@
 {
   "owner": "mvanhorn",
   "slug": "parallel",
-  "displayName": "OpenClaw Parallel",
+  "displayName": "Parallel",
   "latest": {
-    "version": "1.0.7",
-    "publishedAt": 1770827728985,
-    "commit": "https://github.com/openclaw/skills/commit/b0e8eaed93accff46509c26ad5fabaa42eb298ee"
+    "version": "1.2.1",
+    "publishedAt": 1772859027269,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.7",
+      "publishedAt": 1770827728985,
+      "commit": "https://github.com/openclaw/skills/commit/b0e8eaed93accff46509c26ad5fabaa42eb298ee"
+    },
     {
       "version": "1.0.4",
       "publishedAt": 1770779474481,
