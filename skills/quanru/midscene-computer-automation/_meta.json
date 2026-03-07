@@ -3,11 +3,16 @@
   "slug": "midscene-computer-automation",
   "displayName": "Midscene Automations Skills for Computer",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1771041244244,
-    "commit": "https://github.com/openclaw/skills/commit/8252458b4bb822383d24547af60abdd5c63c0a3f"
+    "version": "1.0.3",
+    "publishedAt": 1772858536316,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1771041244244,
+      "commit": "https://github.com/openclaw/skills/commit/8252458b4bb822383d24547af60abdd5c63c0a3f"
+    },
     {
       "version": "1.0.1",
       "publishedAt": 1770884685035,
