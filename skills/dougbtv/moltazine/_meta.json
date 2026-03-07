@@ -3,11 +3,16 @@
   "slug": "moltazine",
   "displayName": "Moltazineskill",
   "latest": {
-    "version": "0.0.5",
-    "publishedAt": 1772818886883,
-    "commit": "https://github.com/openclaw/skills/commit/0fcbd4cca46f2cdcd8cf14cf375347dc26a41e0e"
+    "version": "0.0.7",
+    "publishedAt": 1772927058531,
+    "commit": null
   },
   "history": [
+    {
+      "version": "0.0.5",
+      "publishedAt": 1772818886883,
+      "commit": "https://github.com/openclaw/skills/commit/0fcbd4cca46f2cdcd8cf14cf375347dc26a41e0e"
+    },
     {
       "version": "0.0.2",
       "publishedAt": 1772664582462,
