@@ -1,11 +1,17 @@
 {
   "owner": "hilongjw",
   "slug": "seede-design",
-  "displayName": "Seede Design",
+  "displayName": "Seede Design Agent Skills",
   "latest": {
-    "version": "0.0.1",
-    "publishedAt": 1770179727208,
-    "commit": "https://github.com/clawdbot/skills/commit/9cc61d521eb8454a2565bc6c46eb34a82812effc"
+    "version": "1.0.0",
+    "publishedAt": 1772800242607,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "0.0.1",
+      "publishedAt": 1770179727208,
+      "commit": "https://github.com/clawdbot/skills/commit/9cc61d521eb8454a2565bc6c46eb34a82812effc"
+    }
+  ]
 }

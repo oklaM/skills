@@ -1,91 +1,75 @@
-# Seede AI Skill for OpenClaw
+# Seede Skill for Open Claw
 
-English | [中文版](./README_CN.md)
+> **The Ultimate AI Design Skill for Open Claw & Agents.**
+> Generate professional UI, social media graphics, posters, and more directly via Open Claw.
 
-> Generate professional designs using Seede AI based on text or images. Supports generating posters, social media graphics, UI designs, and more.
+This repository contains the **Seede Skill**, enabling [Open Claw](https://github.com/openclaw/openclaw) (and other compatible agents) to generate high-quality designs using [Seede AI](https://seede.ai).
 
-Official Website: [https://seede.ai](https://seede.ai)
+## Why Seede Skill?
 
-## Features
-
-- 🎨 **Text to Design** - Generate beautiful designs through natural language descriptions
-- 🖼️ **Image Reference** - Mimic the style, color, or layout of a reference image
-- 🎨 **Brand Themes** - Support for specifying brand color schemes and themes
-- 📤 **Multi-format Export** - Supports exporting to WebP, PNG, JPG, etc.
-- 📁 **Asset Management** - Upload and reference logos or custom images
+- 🚀 **State-of-the-Art Generation**: Uses the latest AI models to create high-quality, editable designs.
+- 🤖 **Agent-First**: Designed specifically for autonomous agents to control design parameters.
+- 🎨 **Brand Consistency**: Supports brand colors and asset injection.
+- 🛠️ **Full Control**: Precise control over resolution, format, and scene types.
 
 ## Installation
 
-### Manual Installation
+### For Open Claw
+
+Add this repository to your Open Claw configuration or skill list.
+
+### Standalone CLI
+
+You can also use the underlying CLI tool directly:
 
 ```bash
-# Clone or download the Skill
-cp -r seede-skill ~/.clawdbot/skills/seede
+npm install -g seede-cli
 ```
 
-## Configuration
+## Usage
 
-### 1. Get API Token
+### As an Open Claw Skill
 
-1. Visit [Seede AI Token Management](https://seede.ai/profile/token)
-2. Create and copy your **API Token**
+Once the skill is enabled, you can ask Open Claw to perform design tasks:
 
-### 2. Set Environment Variables
+> "Design a modern tech conference poster with neon accents."
+> "Create a social media banner for a coffee shop."
+
+The agent will use the `seede-design` skill to fulfill these requests.
+
+### Configuration
+
+The skill requires the `SEEDE_API_TOKEN` environment variable to be set.
 
 ```bash
 export SEEDE_API_TOKEN="your_api_token"
 ```
 
-It is recommended to add this to your `~/.bashrc` or `~/.zshrc`.
+## Features
 
-## Usage
+- **Text to Design**: Generate complex designs from natural language.
+- **Asset Management**: Upload and manage logos, product shots, and reference images.
+- **Design Management**: List, search, and retrieve design URLs.
 
-### CLI Assistant
+## Manual Usage (CLI)
+
+If you want to use the tool manually:
+
+**Interactive Mode:**
 
 ```bash
-# Create a design task
-./scripts/seede.sh create "Event Poster" "Minimalist tech-style launch event poster @SeedeTheme({'value':'tech'})"
-
-# View task list
-./scripts/seede.sh tasks
-
-# Get details of a specific task
-./scripts/seede.sh get TASK_ID
-
-# Upload assets
-./scripts/seede.sh upload logo.png
-
-# View available models
-./scripts/seede.sh models
+seede create
 ```
 
-### Usage in Clawdbot
+**Command Line (Agent Mode):**
 
-You can directly use natural language instructions:
+```bash
+seede create --no-interactive \
+  --prompt "Modern tech conference poster with neon accents" \
+  --scene "poster" \
+  --format "png"
+```
 
-- "Help me design a tech-style event poster using Seede AI"
-- "Generate a UI interface with a similar style based on this image"
-- "Generate a set of minimalist style social media graphics for my brand"
+## Skill Metadata
 
-## API Reference
-
-For detailed API documentation, please see [SKILL.md](./SKILL.md).
-
-## Workflow
-
-1. **Create Task**: Call `/api/task/create`.
-2. **Wait for Generation**: Designs typically take 30-90 seconds.
-3. **Get Results**: Once the task is complete, retrieve the design via `urls.image`.
-
-## FAQ
-
-- **Task Timeout**: Complex generations may take longer; the script supports automatic polling.
-- **Asset Referencing**: You need to upload the asset first to get a URL, or use the `@SeedeMaterial` syntax in the Prompt.
-
-## About
-
-Built by **hilongjw** for the OpenClaw Community 🦞.
-
-## License
-
-MIT
+This repository includes a `SKILL.md` file that defines the skill capabilities and metadata for the agent system.
