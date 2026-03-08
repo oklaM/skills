@@ -13,29 +13,70 @@ LinkFoxAgent is a specialized AI agent for cross-border e-commerce with 41 built
 1. Get your API key: https://yxgb3sicy7.feishu.cn/wiki/IlkawdQP9ifKv9k22xcc7rjmnkb
 2. Set environment variable: `export LINKFOXAGENT_API_KEY=your-key-here`
 
-## Usage
+## MANDATORY: Use sessions_spawn for All Tasks
 
-```bash
-# Submit task in background — returns messageId immediately (default)
-<skill>/scripts/linkfox.py "task description"
+**NEVER call `linkfox.py` directly from the main session.** LinkFoxAgent tasks take 1-5 minutes. You MUST use `sessions_spawn` to dispatch every task to a sub-agent. This keeps the main session responsive and delivers results automatically when done.
 
-# Submit and wait for result (blocking)
-<skill>/scripts/linkfox.py --wait "task description"
+### How to Dispatch a Task
 
-# Poll result for existing messageId
-<skill>/scripts/linkfox.py --poll <messageId>
+```
+sessions_spawn:
+  task: |
+    Run the following LinkFoxAgent task and report the results back.
 
-# Custom timeout when polling
-<skill>/scripts/linkfox.py --timeout 600 --poll <messageId>
+    Command:
+    <skill>/scripts/linkfox.py --wait --timeout 600 '<TASK_PROMPT>'
+
+    After the command completes:
+    1. Parse the output — it contains a status line, a reflection summary, and result entries (HTML URLs or JSON data).
+    2. If the status is "error" or "cancel", report the error clearly.
+    3. If the status is "finished", summarize the reflection and list all result URLs/data.
+    4. If results contain HTML report URLs, include them so the user can open them directly.
+  label: "LinkFox: <short description>"
+  mode: "run"
+  runTimeoutSeconds: 600
+  cleanup: "keep"
 ```
 
-## How It Works
+### Dispatching Multiple Independent Tasks
 
-1. **Submit**: POST task to LinkFoxAgent API, get `messageId` immediately
-2. **Poll**: Check status until `finished`/`error`/`cancel`
-3. **Results**: Structured response with `reflection` (summary) and `results[]` (HTML URLs or JSON data)
+When the user's request involves multiple independent lookups (e.g., "search both Amazon US and Amazon JP"), spawn one sub-agent per task in parallel:
 
-Status values: `working` | `finished` | `error` | `cancel`
+```
+# Sub-agent 1
+sessions_spawn:
+  task: "Run: <skill>/scripts/linkfox.py --wait '<task A>' ..."
+  label: "LinkFox: task A"
+  mode: "run"
+  runTimeoutSeconds: 600
+
+# Sub-agent 2
+sessions_spawn:
+  task: "Run: <skill>/scripts/linkfox.py --wait '<task B>' ..."
+  label: "LinkFox: task B"
+  mode: "run"
+  runTimeoutSeconds: 600
+```
+
+### What Happens Under the Hood
+
+1. `sessions_spawn` creates an isolated sub-agent session
+2. The sub-agent runs `linkfox.py --wait` which blocks until the task finishes
+3. When done, the sub-agent's result is automatically delivered back to the main session via the announce system
+4. The user sees the result in their chat without any manual polling
+
+### Script Reference
+
+```bash
+# The sub-agent uses --wait mode (blocking, used inside sessions_spawn only)
+<skill>/scripts/linkfox.py --wait "task description"
+
+# Custom timeout (default 300s)
+<skill>/scripts/linkfox.py --wait --timeout 600 "task description"
+
+# JSON output for structured parsing
+<skill>/scripts/linkfox.py --wait --format json "task description"
+```
 
 ## Writing Task Prompts
 
@@ -185,29 +226,6 @@ Read the relevant reference file when you need prompt templates and parameter co
 3、按功能点统计月销量、月销售额、asin数
 ```
 
-## Background Mode (Long-running Tasks)
-
-Tasks typically take 1-5 minutes. The default mode is already background — the script returns `messageId` immediately so openclaw can continue chatting with the user.
-
-**IMPORTANT: `--poll` blocks for 1-5 minutes while waiting for the task. Always call it with `background:true` so openclaw stays responsive during that time.**
-
-```bash
-# Step 1 — Submit task (fast, returns messageId immediately)
-bash command:"<skill>/scripts/linkfox.py 'task description'"
-# → {"messageId": "abc123"}
-
-# Step 2 — Poll result (blocks 1-5 min; MUST use background:true to avoid freezing openclaw)
-bash background:true command:"<skill>/scripts/linkfox.py --poll abc123"
-```
-
-### Auto-Notify on Completion
-
-Combine with `openclaw system event` to notify the user when the task finishes:
-
-```bash
-bash pty:true background:true command:"MSG_ID=$(<skill>/scripts/linkfox.py '...' | python3 -c 'import sys,json; print(json.load(sys.stdin)[\"messageId\"])') && <skill>/scripts/linkfox.py --poll $MSG_ID && openclaw system event --text 'Done: LinkFoxAgent task completed' --mode now"
-```
-
 ## Retry on Failure
 
 If a tool call fails, the response includes error details. Retry with adjusted parameters based on the error message. Common issues:
@@ -215,21 +233,3 @@ If a tool call fails, the response includes error details. Retry with adjusted p
 - Invalid pattern format (check regex patterns)
 - Too many tools in one task (max 10)
 
-## Quality Assurance Rules
-
-### Rule 1: Validate Every Report
-
-After any task completes, read the HTML report content and verify the results are relevant to the user's target.
-
-- If the returned data is off-topic (e.g., wrong category, cross-domain noise), adjust the prompt to tighten scope and resubmit — **maximum one retry**.
-- If the retry still returns irrelevant data, report the issue to the user rather than retrying again.
-
-### Rule 2: Act on Follow-up Suggestions
-
-If the report contains forward-looking suggestions such as:
-- "建议补充查询 XX"
-- "建议排查 XX"
-- "主要竞争对手包括 XX"
-- or similar calls-to-action
-
-Execute them proactively without waiting for the user to ask. Limit follow-up to **one round or one brand** to avoid infinite recursion.
