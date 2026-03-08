@@ -1,6 +1,7 @@
 ---
 name: 0g-compute
 description: "Use cheap, TEE-verified AI models from the 0G Compute Network as OpenClaw providers. Discover available models and compare pricing vs OpenRouter, verify provider integrity via hardware attestation (Intel TDX), manage your 0G wallet and sub-accounts, and configure models in OpenClaw with one workflow. Supports DeepSeek, GLM-5, Qwen, and other models available on the 0G marketplace."
+metadata: {"openclaw":{"requires":{"bins":["0g-compute-cli"]},"install":[{"id":"node","kind":"node","package":"@0glabs/0g-serving-broker","bins":["0g-compute-cli"],"label":"Install 0G Compute CLI"}]}}
 ---
 
 # 0G Compute Network
@@ -9,9 +10,11 @@ Interface with the 0G Compute Network — a decentralized AI inference marketpla
 
 ## Prerequisites
 
-- `0g-compute-cli` installed: `npm i -g @0glabs/0g-compute-cli`
+- `0g-compute-cli` installed: `npm i -g @0glabs/0g-serving-broker`
+  - Note: npm package name is `@0glabs/0g-serving-broker` (the old `@0glabs/0g-compute-cli` package name no longer resolves), but the binary command is still `0g-compute-cli`.
 - Wallet funded with 0G tokens
-- Logged in: `0g-compute-cli login --private-key <key>`
+- Logged in: avoid passing key on the command line when possible (it can be visible in shell history/process list). Prefer reading from a protected prompt/env:
+  - `read -s OG_PK; 0g-compute-cli login --private-key "$OG_PK"; unset OG_PK`
 - Network configured: `0g-compute-cli setup-network`
 
 ## Core Workflows

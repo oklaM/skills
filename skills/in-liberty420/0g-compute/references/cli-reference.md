@@ -2,6 +2,10 @@
 
 Complete command reference for `0g-compute-cli`. Organized by category.
 
+Install note:
+- Install via `npm i -g @0glabs/0g-serving-broker`
+- Binary remains `0g-compute-cli`
+
 ## Table of Contents
 
 - [Account Management](#account-management)
@@ -225,8 +229,13 @@ Use this secret as the `apiKey` when configuring OpenClaw providers.
 Authenticate with a private key.
 
 ```bash
-0g-compute-cli login --private-key <key>
+# Safer: avoid putting raw key in command history/process list
+read -s OG_PK
+0g-compute-cli login --private-key "$OG_PK"
+unset OG_PK
 ```
+
+(Direct `--private-key <key>` still works, but is less safe on shared/monitored systems.)
 
 | Flag | Description |
 |------|-------------|
