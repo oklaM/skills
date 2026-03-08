@@ -94,13 +94,15 @@ export default function (api) {
       additionalProperties: false,
     },
     optional: true,
-    async execute({ dashboard_uid }) {
+    async execute(toolCallId, params) {
+      const { dashboard_uid } = params;
       const { url, user, password } = getConfig();
+      const path = `/api/dashboards/uid/${encodeURIComponent(dashboard_uid)}`;
       const res = await grafanaFetch(
         url,
         user,
         password,
-        `/api/dashboards/uid/${encodeURIComponent(dashboard_uid)}`
+        path
       );
       if (!res.ok) throw new Error(`Grafana ${res.status}: ${await res.text()}`);
       const { dashboard } = await res.json();
@@ -138,7 +140,8 @@ export default function (api) {
       additionalProperties: false,
     },
     optional: true,
-    async execute({ dashboard_uid, panel_id, from = "now-1h", to = "now" }) {
+    async execute(toolCallId, params) {
+      const { dashboard_uid, panel_id, from = "now-1h", to = "now" } = params;
       const { url, user, password } = getConfig();
 
       // Fetch dashboard to resolve panel targets and datasource.
