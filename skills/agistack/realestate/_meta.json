@@ -1,0 +1,11 @@
+{
+  "owner": "agistack",
+  "slug": "realestate",
+  "displayName": "Real Estate",
+  "latest": {
+    "version": "2.0.1",
+    "publishedAt": 1772977971304,
+    "commit": null
+  },
+  "history": []
+}
