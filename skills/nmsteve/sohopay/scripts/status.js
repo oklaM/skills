@@ -219,39 +219,33 @@ async function main() {
     const usdcBalanceRaw = await usdc.balanceOf(borrowerAddress);
     const usdcBalance = ethers.formatUnits(usdcBalanceRaw, USDC_DECIMALS);
 
-    console.log(`- Registered (mapping): ${formatStatusFlag(isRegistered)}`);
-    console.log(`- Active (BorrowerManager): ${formatStatusFlag(isActive)}`);
-    console.log(`- USDC wallet balance: ${usdcBalance} USDC`);
-    console.log(`- Profile layout source: ${profileLayout}`);
 
-    console.log("\n📊 Borrower Profile:");
-    console.log(`- Credit limit:       ${ethers.formatUnits(creditLimit, USDC_DECIMALS)} USDC`);
-    console.log(`- Outstanding debt:   ${ethers.formatUnits(outstandingDebt, USDC_DECIMALS)} USDC`);
-    console.log(`- Total spent:        ${ethers.formatUnits(totalSpent, USDC_DECIMALS)} USDC`);
-    console.log(`- Total repaid:       ${ethers.formatUnits(totalRepaid, USDC_DECIMALS)} USDC`);
-    console.log(`- Spending count:     ${spendingCount.toString()}`);
-    console.log(`- Repayment count:    ${repaymentCount.toString()}`);
     const lastActivitySeconds = Number(lastActivityTime ?? 0n);
-    const lastActivityDisplay = lastActivitySeconds === 0 ? "never" : new Date(lastActivitySeconds * 1000).toISOString();
-    console.log(`- Last activity time: ${lastActivityDisplay}`);
-    console.log(`- Credit score:       ${creditScore.toString()}`);
-    console.log(`- isActive (profile): ${profileIsActive ? "✅ yes" : "❌ no"}`);
+    const lastActivityDisplay = lastActivitySeconds === 0
+        ? "never"
+        : new Date(lastActivitySeconds * 1000).toISOString().replace('T', ' ').replace(/\.\d{3}Z$/, ' UTC');
 
-    if (profileIsAgent === null) {
-        console.log("- isAgent (profile):  ⚠️ not provided by legacy layout");
-    } else {
-        console.log(`- isAgent (profile):  ${profileIsAgent ? "✅ yes" : "❌ no"}`);
+    const formatUsdc = (value) => `${ethers.formatUnits(value, USDC_DECIMALS)} USDC`;
+
+    const orderedLines = [
+        { label: 'Registered', value: formatStatusFlag(isRegistered) },
+        { label: 'Active', value: profileIsActive ? '✅ yes' : '❌ no' },
+        { label: 'Balance', value: formatUsdc(usdcBalanceRaw) },
+        { label: 'Credit limit', value: formatUsdc(creditLimit) },
+        { label: 'Spent', value: formatUsdc(totalSpent) },
+        { label: 'Debt', value: formatUsdc(outstandingDebt) },
+        { label: 'Repaid', value: formatUsdc(totalRepaid) },
+        { label: 'Spending Count', value: spendingCount.toString() },
+        { label: 'Repayment count', value: repaymentCount.toString() },
+        { label: 'Credit score', value: creditScore.toString() },
+        { label: 'Last activity', value: lastActivityDisplay },
+    ];
+
+    console.log('');
+    for (const line of orderedLines) {
+        console.log(`${line.label}: **${line.value}**`);
     }
 
-    if (profileLayout.startsWith("legacy")) {
-        console.log("- Transactions seen:  ⚠️ not provided by legacy layout");
-    } else {
-        console.log(`- Transactions seen:  ${transactionIds.length}`);
-    }
-
-    console.log("\nSUMMARY:");
-    console.log(`USDC balance for ${borrowerAddress} on ${networkConfig.name}: ${usdcBalance} USDC`);
-    console.log(`Outstanding debt for ${borrowerAddress} on ${networkConfig.name}: ${ethers.formatUnits(outstandingDebt, USDC_DECIMALS)} USDC`);
 }
 
 main().catch((err) => {
