@@ -1,7 +1,7 @@
 # Photo Captions
 
 [![ClawHub](https://img.shields.io/badge/ClawHub-photo--captions-blue)](https://clawhub.ai/pfrederiksen/photo-captions)
-[![Version](https://img.shields.io/badge/version-1.2.2-green)]()
+[![Version](https://img.shields.io/badge/version-1.2.3-green)]()
 
 An [OpenClaw](https://openclaw.ai) skill that generates platform-tuned social media captions for photography. Share a photo with context (location, camera, lens, film stock) and get captions tailored to each platform.
 

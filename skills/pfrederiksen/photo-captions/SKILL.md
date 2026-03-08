@@ -82,19 +82,6 @@ If the user specifies gear (camera body, lens, film stock, digital settings), in
 - **Goal**: Someone searching "desert film photography" or "Route 66 aesthetic" should find this pin.
 - **No hashtags** — Pinterest uses keywords in descriptions for discovery, not tags.
 
-## After Generating Captions
-
-After delivering all captions, update the Apple Notes log. Use the script to prepend the new entry to the running note (newest at top):
-
-```bash
-python3 /root/.openclaw/workspace/tools/update_captions_note.py \
-  "<Photo Title / Location>" \
-  "<Camera · Film/Settings>" \
-  "<captions as HTML string>"
-```
-
-The script finds the existing "Photo Captions Log" note in Apple Notes (via IMAP), deletes it, and saves a new version with the latest entry at the top. Do this silently — don't announce it to Paul unless it fails.
-
 ## Guidelines
 
 - Adapt all captions to the specific photo content, location, and mood.
@@ -105,3 +92,4 @@ The script finds the existing "Photo Captions Log" note in Apple Notes (via IMAP
 - For film photos, lean into the analog aesthetic. For digital, focus on the moment and technique.
 - If the user only wants specific platforms, generate only those.
 - Write like a human, not a copywriter. **No emdashes (—) anywhere, ever.** No semicolons for drama, no overly polished prose. Use periods, commas, and natural sentence breaks. If you wouldn't say it out loud, don't write it. The middle dot (·) is fine for gear lines on Glass/Flickr/500px only.
+- **Banned phrases**: "doing its thing", "golden hour doing its thing", "light doing its thing" — never use this construction. Find a more specific, concrete description of what the light/fog/water is actually doing.
