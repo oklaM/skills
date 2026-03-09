@@ -1,6 +1,6 @@
 ---
 name: video-summary
-version: 1.3.2
+version: 1.3.3
 description: "AI-powered video summarization for Bilibili, Xiaohongshu, Douyin, and YouTube. Extract insights from video content through automated transcription and intelligent summarization."
 metadata:
   openclaw:
@@ -51,11 +51,12 @@ After installation, OpenClaw will guide you through configuration step by step.
 
 **Step 1: Select AI Provider**
 OpenClaw will ask: Which AI service do you want to use?
-- 1) OpenAI
-- 2) Zhipu GLM
-- 3) DeepSeek
-- 4) Moonshot/Kimi
-- 5) Custom
+- 1) Use existing OpenClaw configuration (auto-detected)
+- 2) OpenAI
+- 3) Zhipu GLM
+- 4) DeepSeek
+- 5) Moonshot/Kimi
+- 6) Custom
 
 **Step 2: Enter API Key**
 Based on your selection, OpenClaw will prompt for the API Key.
@@ -124,21 +125,33 @@ If returns `status: "pending"` or `status: "not_started"`, start conversational 
 
 #### Step 2: Select AI Provider
 
+**First, check if OpenClaw has existing LLM config:**
+
+```bash
+# Detect OpenClaw's existing LLM configuration
+cat ~/.openclaw/agents/main/agent/models.json 2>/dev/null | jq -r '.providers | to_entries[0] | "\(.key) \(.value.apiKey // .value.key)"' 2>/dev/null
+```
+
 **OpenClaw should ask:**
 
 > 🎬 video-summary needs an AI service to generate summaries. Which one do you want to use?
 > 
-> 1. OpenAI
-> 2. Zhipu GLM
-> 3. DeepSeek
-> 4. Moonshot/Kimi
-> 5. Custom endpoint
+> 1. Use existing OpenClaw configuration (detected: {provider})
+> 2. OpenAI
+> 3. Zhipu GLM
+> 4. DeepSeek
+> 5. Moonshot/Kimi
+> 6. Custom endpoint
 > 
 > Reply with number or name.
 
 **Process user answer:**
 
 ```bash
+# If user selects option 1 (use existing OpenClaw config):
+~/.openclaw/workspace/skills/video-summary/scripts/config-update.sh use_openclaw_config "true"
+
+# Otherwise:
 ~/.openclaw/workspace/skills/video-summary/scripts/config-update.sh api_provider "openai"
 # or "zhipu" / "deepseek" / "moonshot" / custom URL
 ```
